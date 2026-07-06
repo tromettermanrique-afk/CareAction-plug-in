@@ -1,0 +1,2342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07394f" />
+  <title>CareAction | AI 照护行动助手</title>
+  <style>
+    :root {
+      --sea-950: #062c3d;
+      --sea-900: #07394f;
+      --sea-800: #0c4a63;
+      --sea-700: #125f78;
+      --sea-100: #e7f2f5;
+      --sea-50: #f3f8fa;
+      --green-600: #3f8a6b;
+      --green-100: #dcefe5;
+      --green-50: #f2faf5;
+      --rose-600: #a95f5b;
+      --rose-300: #d7a19a;
+      --rose-100: #f3dfdb;
+      --amber-600: #9a661e;
+      --amber-100: #f5e6c8;
+      --red-700: #a23835;
+      --red-100: #f6d8d6;
+      --ink: #17232b;
+      --muted: #5d6d75;
+      --line: #d9e2e6;
+      --paper: #ffffff;
+      --canvas: #eef5f4;
+      --shadow: 0 18px 44px rgba(7, 57, 79, 0.12);
+      --radius: 8px;
+      --focus: 0 0 0 3px rgba(63, 138, 107, 0.35);
+      --sidebar: 288px;
+      --topbar: 76px;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(231, 242, 245, 0.84), rgba(242, 250, 245, 0.9) 46%, #f7f8f7),
+        var(--canvas);
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      padding: 24px 18px;
+      color: #f8fcfd;
+      background: linear-gradient(180deg, var(--sea-950), var(--sea-900));
+      border-right: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      place-items: center;
+      color: var(--sea-950);
+      background: var(--green-100);
+      border-radius: var(--radius);
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .brand-subtitle {
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 13px;
+    }
+
+    .shift-card {
+      padding: 14px;
+      margin-bottom: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: var(--radius);
+    }
+
+    .shift-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 14px;
+    }
+
+    .shift-row strong {
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-button {
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      align-items: center;
+      width: 100%;
+      min-height: 52px;
+      padding: 10px 12px;
+      color: rgba(255, 255, 255, 0.82);
+      background: transparent;
+      border-radius: var(--radius);
+      text-align: left;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-icon {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      color: var(--green-100);
+      font-weight: 800;
+    }
+
+    .nav-kicker {
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 12px;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      right: 18px;
+      bottom: 22px;
+      left: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 13px;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: var(--topbar);
+      padding: 14px 28px;
+      background: rgba(247, 251, 250, 0.88);
+      border-bottom: 1px solid rgba(217, 226, 230, 0.8);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      color: var(--sea-950);
+      font-size: 24px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .topbar p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      color: var(--sea-800);
+      background: var(--sea-100);
+      border: 1px solid #c9dde4;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .ghost-button,
+    .primary-button,
+    .secondary-button,
+    .danger-button,
+    .icon-button {
+      min-height: 44px;
+      border-radius: var(--radius);
+      font-weight: 800;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .ghost-button {
+      padding: 10px 14px;
+      color: var(--sea-900);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .primary-button {
+      padding: 11px 18px;
+      color: #fff;
+      background: var(--sea-900);
+    }
+
+    .secondary-button {
+      padding: 11px 18px;
+      color: var(--sea-950);
+      background: var(--green-100);
+      border: 1px solid #bddfcb;
+    }
+
+    .danger-button {
+      padding: 11px 18px;
+      color: #fff;
+      background: var(--rose-600);
+    }
+
+    .icon-button {
+      display: inline-grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      color: var(--sea-900);
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 20px;
+    }
+
+    .ghost-button:hover,
+    .primary-button:hover,
+    .secondary-button:hover,
+    .danger-button:hover,
+    .icon-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(7, 57, 79, 0.14);
+    }
+
+    .content {
+      width: min(1320px, 100%);
+      margin: 0 auto;
+      padding: 26px 28px 44px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(420px, 0.98fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .dashboard-grid > *,
+    .two-column > *,
+    .feedback-grid > * {
+      min-width: 0;
+    }
+
+    .section-panel,
+    .task-card,
+    .action-card,
+    .evidence-panel,
+    .feedback-panel {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(217, 226, 230, 0.94);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .section-panel {
+      padding: 20px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-heading h2,
+    .section-heading h3 {
+      margin: 0;
+      color: var(--sea-950);
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .section-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      padding: 14px;
+      background: var(--sea-50);
+      border: 1px solid #d7e7ec;
+      border-radius: var(--radius);
+    }
+
+    .stat b {
+      display: block;
+      color: var(--sea-950);
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .task-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      width: 100%;
+      min-height: 112px;
+      padding: 16px;
+      text-align: left;
+    }
+
+    .task-card.active {
+      border-color: var(--sea-700);
+      box-shadow: 0 12px 30px rgba(7, 57, 79, 0.18);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .task-title {
+      margin: 0;
+      color: var(--sea-950);
+      font-size: 21px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .task-desc {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .task-side {
+      display: grid;
+      align-content: space-between;
+      justify-items: end;
+      min-width: 120px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tag.status {
+      color: var(--sea-900);
+      background: var(--sea-100);
+    }
+
+    .tag.success {
+      color: #225c47;
+      background: var(--green-100);
+    }
+
+    .tag.warning {
+      color: var(--amber-600);
+      background: var(--amber-100);
+    }
+
+    .tag.danger {
+      color: var(--red-700);
+      background: var(--red-100);
+    }
+
+    .tag.rose {
+      color: var(--rose-600);
+      background: var(--rose-100);
+    }
+
+    .tag.neutral {
+      color: #4d5960;
+      background: #edf1f2;
+    }
+
+    .action-card {
+      overflow: hidden;
+    }
+
+    .action-hero {
+      padding: 22px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(7, 57, 79, 0.98), rgba(18, 95, 120, 0.98)),
+        var(--sea-900);
+    }
+
+    .action-hero-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .elder-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 15px;
+    }
+
+    .elder-avatar {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      color: var(--sea-950);
+      background: var(--green-100);
+      border-radius: var(--radius);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .confidence-meter {
+      min-width: 188px;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 13px;
+    }
+
+    .meter-track {
+      height: 8px;
+      margin-top: 7px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 74%;
+      background: linear-gradient(90deg, var(--green-100), #8fd3ae);
+      border-radius: inherit;
+    }
+
+    .action-title {
+      margin: 0;
+      max-width: 760px;
+      font-size: 34px;
+      line-height: 1.14;
+      letter-spacing: 0;
+    }
+
+    .action-subtitle {
+      margin: 10px 0 0;
+      max-width: 760px;
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 17px;
+    }
+
+    .action-body {
+      display: grid;
+      gap: 18px;
+      padding: 22px;
+    }
+
+    .action-strip {
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .action-strip:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .strip-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 10px;
+      color: var(--sea-900);
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .step-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: steps;
+    }
+
+    .step-list li {
+      position: relative;
+      min-height: 48px;
+      padding: 10px 12px 10px 50px;
+      background: var(--sea-50);
+      border-left: 4px solid var(--green-600);
+      border-radius: var(--radius);
+      counter-increment: steps;
+    }
+
+    .step-list li::before {
+      content: counter(steps);
+      position: absolute;
+      top: 11px;
+      left: 12px;
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      color: #fff;
+      background: var(--sea-800);
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .script-box {
+      padding: 15px 16px;
+      color: #2b2b2b;
+      background: var(--rose-100);
+      border-left: 5px solid var(--rose-600);
+      border-radius: var(--radius);
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .voice-action-panel {
+      display: grid;
+      grid-template-columns: 138px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--sea-900), var(--sea-700));
+      border-radius: var(--radius);
+    }
+
+    .voice-action-panel.playing {
+      box-shadow: 0 0 0 4px rgba(63, 138, 107, 0.22);
+    }
+
+    .voice-play-button {
+      min-height: 104px;
+      color: var(--sea-950);
+      background: var(--green-100);
+      border-radius: var(--radius);
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .voice-play-button span {
+      display: block;
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .voice-action-copy strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .voice-action-copy p {
+      margin: 0 0 10px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .voice-wave {
+      display: flex;
+      align-items: end;
+      gap: 5px;
+      height: 26px;
+      margin-bottom: 10px;
+    }
+
+    .voice-wave span {
+      display: block;
+      width: 7px;
+      height: 11px;
+      background: rgba(220, 239, 229, 0.7);
+      border-radius: 999px;
+      transition: height 0.2s ease;
+    }
+
+    .voice-action-panel.playing .voice-wave span:nth-child(1) { height: 18px; }
+    .voice-action-panel.playing .voice-wave span:nth-child(2) { height: 26px; }
+    .voice-action-panel.playing .voice-wave span:nth-child(3) { height: 14px; }
+    .voice-action-panel.playing .voice-wave span:nth-child(4) { height: 23px; }
+    .voice-action-panel.playing .voice-wave span:nth-child(5) { height: 17px; }
+
+    .fast-action-box {
+      padding: 16px;
+      background: var(--green-50);
+      border: 1px solid #cfe9d9;
+      border-radius: var(--radius);
+    }
+
+    .fast-action-box p {
+      margin: 0;
+      color: var(--sea-950);
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .step-list.compact li {
+      min-height: 42px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .outcome-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .outcome {
+      padding: 14px;
+      background: var(--green-50);
+      border: 1px solid #cfe9d9;
+      border-radius: var(--radius);
+    }
+
+    .outcome strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--sea-900);
+      font-size: 15px;
+    }
+
+    .safety-banner {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 15px;
+      color: #452b13;
+      background: var(--amber-100);
+      border: 1px solid #e5ca8f;
+      border-radius: var(--radius);
+    }
+
+    .safety-banner.high {
+      color: #4b1614;
+      background: var(--red-100);
+      border-color: #e7aaa6;
+    }
+
+    .safety-icon {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.58);
+      border-radius: var(--radius);
+      font-weight: 900;
+    }
+
+    .safety-banner strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 17px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1.08fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .profile-summary {
+      display: grid;
+      gap: 14px;
+    }
+
+    .profile-card {
+      padding: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .profile-card h3 {
+      margin: 0 0 8px;
+      color: var(--sea-950);
+      font-size: 20px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .profile-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .kv-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .kv {
+      padding: 12px;
+      background: var(--sea-50);
+      border-radius: var(--radius);
+    }
+
+    .kv span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .kv strong {
+      color: var(--sea-950);
+      font-size: 18px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      gap: 14px;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .timeline-time {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .timeline-content h3,
+    .timeline-content h4 {
+      margin: 0 0 6px;
+      color: var(--sea-950);
+      font-size: 18px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .timeline-content p {
+      margin: 0 0 10px;
+      color: var(--muted);
+    }
+
+    .confidence-note {
+      padding: 12px 14px;
+      margin-top: 14px;
+      color: var(--sea-900);
+      background: var(--sea-50);
+      border-left: 4px solid var(--sea-700);
+      border-radius: var(--radius);
+      font-size: 15px;
+    }
+
+    .feedback-panel {
+      padding: 22px;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0 20px;
+    }
+
+    .effect-choice {
+      min-height: 96px;
+      padding: 14px;
+      color: var(--sea-950);
+      background: #fff;
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      text-align: left;
+    }
+
+    .effect-choice strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 19px;
+    }
+
+    .effect-choice span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .effect-choice.active {
+      background: var(--green-50);
+      border-color: var(--green-600);
+    }
+
+    .field-group {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .field-group label {
+      color: var(--sea-950);
+      font-weight: 900;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      min-height: 118px;
+      padding: 13px 14px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      resize: vertical;
+    }
+
+    input[type="text"] {
+      min-height: 48px;
+      resize: none;
+    }
+
+    .feedback-status {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 14px;
+      border-radius: var(--radius);
+      font-weight: 800;
+    }
+
+    .feedback-status.show {
+      display: block;
+    }
+
+    .feedback-status.success {
+      color: #20533f;
+      background: var(--green-100);
+      border: 1px solid #b9dcc7;
+    }
+
+    .feedback-status.pending {
+      color: var(--amber-600);
+      background: var(--amber-100);
+      border: 1px solid #dfc385;
+    }
+
+    .helper-text {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .quick-chip-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .quick-chip {
+      min-height: 54px;
+      padding: 10px 12px;
+      color: var(--sea-950);
+      background: #fff;
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .quick-chip.active {
+      background: var(--green-50);
+      border-color: var(--green-600);
+      box-shadow: 0 8px 18px rgba(63, 138, 107, 0.12);
+    }
+
+    .voice-note-panel {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 14px;
+      align-items: stretch;
+      padding: 14px;
+      margin-bottom: 16px;
+      background: var(--sea-50);
+      border: 1px solid #d4e5eb;
+      border-radius: var(--radius);
+    }
+
+    .voice-button {
+      min-height: 78px;
+      color: #fff;
+      background: var(--sea-900);
+      border-radius: var(--radius);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .voice-note-panel strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--sea-950);
+    }
+
+    .voice-note-panel p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .compact-note textarea {
+      min-height: 74px;
+    }
+
+
+    .evidence-panel {
+      padding: 20px;
+    }
+
+    .profile-header {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .big-avatar {
+      display: grid;
+      width: 76px;
+      height: 76px;
+      place-items: center;
+      color: #fff;
+      background: var(--sea-900);
+      border-radius: var(--radius);
+      font-size: 32px;
+      font-weight: 900;
+    }
+
+    .profile-header h2 {
+      margin: 0 0 6px;
+      color: var(--sea-950);
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .profile-header p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .info-bands {
+      display: grid;
+      gap: 14px;
+    }
+
+    .info-band {
+      padding: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .info-band h3 {
+      margin: 0 0 10px;
+      color: var(--sea-900);
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .summary-list li {
+      padding-left: 14px;
+      border-left: 4px solid var(--green-600);
+      color: var(--muted);
+    }
+
+    .mobile-nav {
+      display: none;
+    }
+
+    .loading-line {
+      position: relative;
+      overflow: hidden;
+      background: #e8f0f2;
+      border-radius: 999px;
+    }
+
+    .loading-line::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.78), transparent);
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer {
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .app-shell {
+        grid-template-columns: 84px minmax(0, 1fr);
+      }
+
+      .sidebar {
+        padding: 18px 12px;
+      }
+
+      .brand {
+        justify-content: center;
+      }
+
+      .brand-title,
+      .brand-subtitle,
+      .shift-card,
+      .nav-text,
+      .nav-kicker,
+      .sidebar-footer {
+        display: none;
+      }
+
+      .nav-button {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: 10px;
+      }
+
+      .dashboard-grid,
+      .two-column,
+      .feedback-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-title {
+        font-size: 30px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body {
+        font-size: 16px;
+      }
+
+      .app-shell {
+        display: block;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .topbar {
+        position: static;
+        align-items: flex-start;
+        padding: 16px;
+      }
+
+      .topbar h1 {
+        font-size: 22px;
+      }
+
+      .topbar-actions {
+        display: none;
+      }
+
+      .content {
+        padding: 14px 14px 96px;
+      }
+
+      .dashboard-grid,
+      .two-column,
+      .feedback-grid {
+        gap: 14px;
+      }
+
+      #view-today .dashboard-grid > .action-card {
+        order: -1;
+      }
+
+      .section-panel,
+      .feedback-panel,
+      .evidence-panel {
+        padding: 16px;
+      }
+
+      .section-heading {
+        display: block;
+      }
+
+      .status-grid,
+      .choice-grid,
+      .quick-chip-grid,
+      .outcome-row,
+      .kv-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .task-card {
+        grid-template-columns: 1fr;
+      }
+
+      .task-side {
+        min-width: 0;
+        justify-items: start;
+        gap: 8px;
+      }
+
+      .voice-note-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .voice-action-panel {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .voice-play-button {
+        min-height: 78px;
+      }
+
+      .action-hero,
+      .action-body {
+        padding: 16px 18px;
+      }
+
+      .action-hero-row {
+        display: grid;
+      }
+
+      .confidence-meter {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .action-title {
+        font-size: 23px;
+        line-height: 1.12;
+      }
+
+      .action-subtitle {
+        margin-top: 8px;
+        font-size: 15px;
+      }
+
+      .action-body {
+        gap: 12px;
+      }
+
+      .action-strip {
+        padding: 12px 0;
+      }
+
+      .strip-title {
+        margin-bottom: 8px;
+        font-size: 17px;
+      }
+
+      .script-box {
+        padding: 12px;
+        font-size: 17px;
+      }
+
+      .fast-action-box p {
+        font-size: 19px;
+      }
+
+      .safety-banner {
+        padding: 12px;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .profile-header {
+        grid-template-columns: 58px 1fr;
+      }
+
+      .big-avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 26px;
+      }
+
+      .profile-header h2 {
+        font-size: 24px;
+      }
+
+      .mobile-nav {
+        position: fixed;
+        right: 10px;
+        bottom: 8px;
+        left: 10px;
+        z-index: 40;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+        padding: 6px;
+        background: rgba(6, 44, 61, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: var(--radius);
+        box-shadow: 0 12px 30px rgba(6, 44, 61, 0.28);
+      }
+
+      .mobile-nav .nav-button {
+        min-width: 0;
+        min-height: 48px;
+        padding: 6px 2px;
+        color: rgba(255, 255, 255, 0.75);
+        border-radius: 6px;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .mobile-nav .nav-button span:not(.nav-icon) {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .mobile-nav .nav-button.active {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .mobile-nav .nav-icon {
+        width: auto;
+        height: 22px;
+        font-size: 17px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .task-title {
+        font-size: 19px;
+      }
+
+      .action-title {
+        font-size: 23px;
+      }
+
+      .action-buttons {
+        display: grid;
+      }
+
+      .primary-button,
+      .secondary-button,
+      .danger-button,
+      .ghost-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand" aria-label="CareAction">
+        <div class="brand-mark">C</div>
+        <div>
+          <h1 class="brand-title">CareAction</h1>
+          <p class="brand-subtitle">AI 照护行动助手</p>
+        </div>
+      </div>
+
+      <div class="shift-card" aria-label="当前班次">
+        <div class="shift-row"><span>当前班次</span><strong>早班 07:00-15:00</strong></div>
+        <div class="shift-row"><span>护理员</span><strong>陈晓岚</strong></div>
+        <div class="shift-row"><span>同步状态</span><strong id="sidebarSync">刚刚同步</strong></div>
+      </div>
+
+      <nav>
+        <ul class="nav-list">
+          <li><button class="nav-button active" data-view="today" type="button"><span class="nav-icon">T</span><span class="nav-text">Today 今日任务</span><span class="nav-kicker">4 项</span></button></li>
+          <li><button class="nav-button" data-view="action" type="button"><span class="nav-icon">A</span><span class="nav-text">Action Card</span><span class="nav-kicker">执行</span></button></li>
+          <li><button class="nav-button" data-view="why" type="button"><span class="nav-icon">W</span><span class="nav-text">Why 建议依据</span><span class="nav-kicker">证据</span></button></li>
+          <li><button class="nav-button" data-view="feedback" type="button"><span class="nav-icon">F</span><span class="nav-text">Feedback 反馈</span><span class="nav-kicker">学习</span></button></li>
+          <li><button class="nav-button" data-view="evidence" type="button"><span class="nav-icon">E</span><span class="nav-text">Evidence 画像</span><span class="nav-kicker">底座</span></button></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        AI 建议仅作为照护辅助。涉及诊断、用药、急救、约束措施时遵循机构流程并联系专业人员。
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Today 今日任务</h1>
+          <p id="pageSubtitle">从今日照护对象开始，快速进入可执行行动建议。</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="sync-pill" id="topSync">离线缓存可用 · 09:22</span>
+          <button class="ghost-button" type="button" id="simulatePending">模拟弱网</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="view active" id="view-today" aria-labelledby="todayHeading">
+          <div class="dashboard-grid">
+            <div class="section-panel">
+              <div class="section-heading">
+                <div>
+                  <h2 id="todayHeading">今日照护对象</h2>
+                  <p>按开始时间、风险和 Action Card 就绪状态排序。</p>
+                </div>
+                <span class="tag success" id="readySummary">4/6 已准备</span>
+              </div>
+
+              <div class="status-grid" aria-label="今日任务概览">
+                <div class="stat"><b id="taskCount">6</b><span>今日任务</span></div>
+                <div class="stat"><b id="manualCount">2</b><span>需人工确认</span></div>
+                <div class="stat"><b id="feedbackRate">80%</b><span>反馈提交率</span></div>
+              </div>
+
+              <div class="task-list" id="taskList"></div>
+            </div>
+
+            <article class="action-card" aria-label="推荐 Action Card 预览">
+              <div class="action-hero">
+                <div class="action-hero-row">
+                  <div class="elder-line">
+                    <span class="elder-avatar" id="todayAvatar">周</span>
+                    <span id="todayElderLine">周雅琴 · 82 岁 · 记忆力下降</span>
+                  </div>
+                  <div class="confidence-meter">
+                    <div id="todayConfidenceLabel">AI 置信度 78% · 中高</div>
+                    <div class="meter-track"><div class="meter-fill" id="todayMeter"></div></div>
+                  </div>
+                </div>
+                <h2 class="action-title" id="todayActionTitle">先用“找红围巾”的熟悉线索，引导她完成洗漱前准备</h2>
+                <p class="action-subtitle" id="todayActionSubtitle">适用于拒绝洗漱、焦虑寻找物品、重复询问的早班场景。</p>
+              </div>
+              <div class="action-body">
+                <div class="safety-banner" id="todaySafety">
+                  <div class="safety-icon">!</div>
+                  <div>
+                    <strong id="todaySafetyTitle">安全边界</strong>
+                    <span id="todaySafetyText">本建议不涉及诊断或用药。若出现胸痛、跌倒、急性意识改变，请停止执行并遵循机构应急流程。</span>
+                  </div>
+                </div>
+                <div class="action-strip">
+                  <h3 class="strip-title">推荐话术</h3>
+                  <div class="script-box" id="todayScript">“周阿姨，我们先把红围巾放好，再一起洗把脸，等会儿您女儿来的时候看起来精神些。”</div>
+                </div>
+                <div class="action-buttons">
+                  <button class="primary-button" data-view="action" data-autoplay="voice" type="button">听语音要点</button>
+                  <button class="secondary-button" data-view="why" type="button">查看依据</button>
+                  <button class="ghost-button" data-view="feedback" type="button">执行后反馈</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-action" aria-labelledby="actionHeading">
+          <div class="two-column">
+            <article class="action-card">
+              <div class="action-hero">
+                <div class="action-hero-row">
+                  <div class="elder-line">
+                    <span class="elder-avatar" id="actionAvatar">周</span>
+                    <span id="actionElderLine">周雅琴 · 82 岁 · 房间 302</span>
+                  </div>
+                  <div class="confidence-meter">
+                    <div id="actionConfidenceLabel">AI 置信度 78% · 中高</div>
+                    <div class="meter-track"><div class="meter-fill" id="actionMeter"></div></div>
+                  </div>
+                </div>
+                <h2 class="action-title" id="actionHeading">先用“找红围巾”的熟悉线索，引导她完成洗漱前准备</h2>
+                <p class="action-subtitle" id="actionContext">任务：08:30 洗漱协助 · 当前状态：Action Card 已生成</p>
+              </div>
+
+              <div class="action-body">
+                <div class="voice-action-panel" id="voiceActionPanel">
+                  <button class="voice-play-button" type="button" id="playActionVoice">播报<span>20 秒要点</span></button>
+                  <div class="voice-action-copy">
+                    <strong>护工语音要点</strong>
+                    <p id="voiceSummary">先陪周阿姨确认红围巾，再用女儿来访的线索引导洗漱。异常情况按机构流程。</p>
+                    <div class="voice-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+                    <span class="tag success" id="voiceState">可直接播报</span>
+                  </div>
+                </div>
+
+                <div class="action-strip">
+                  <h3 class="strip-title">现在就做</h3>
+                  <div class="fast-action-box">
+                    <p id="mainAction">用她熟悉的物品作为过渡线索，先降低焦虑，再进入洗漱动作。</p>
+                  </div>
+                </div>
+
+                <div class="action-strip">
+                  <h3 class="strip-title">只记 3 步</h3>
+                  <ol class="step-list compact" id="stepList"></ol>
+                </div>
+
+                <div class="action-strip">
+                  <h3 class="strip-title">照着说</h3>
+                  <div class="script-box" id="scriptBox">“周阿姨，我们先把红围巾放好，再一起洗把脸，等会儿您女儿来的时候看起来精神些。”</div>
+                </div>
+
+                <div class="safety-banner" id="actionSafety">
+                  <div class="safety-icon">!</div>
+                  <div>
+                    <strong id="actionSafetyTitle">安全边界</strong>
+                    <span id="actionSafetyText">不替代专业医疗判断。若出现急性异常，立即遵循机构流程。</span>
+                  </div>
+                </div>
+
+                <div class="action-buttons">
+                  <button class="secondary-button" data-view="why" type="button">查看依据</button>
+                  <button class="primary-button" data-view="feedback" type="button">已按此执行</button>
+                  <button class="ghost-button" data-view="today" type="button">返回 Today</button>
+                </div>
+              </div>
+            </article>
+
+            <aside class="section-panel">
+              <div class="section-heading">
+                <div>
+                  <h3>现场小抄</h3>
+                  <p id="taskStatusLine">08:30 · 洗漱协助 · 建议已生成</p>
+                </div>
+                <span class="tag status" id="taskStateTag">待执行</span>
+              </div>
+
+              <div class="profile-summary">
+                <div class="profile-card">
+                  <h3>如果只看一句</h3>
+                  <p id="careReminder">先稳定情绪，不要直接纠正“围巾丢了”的判断。</p>
+                </div>
+                <div class="profile-card">
+                  <h3>预计反应</h3>
+                  <p id="expectedResult">老人焦虑降低，愿意跟随护理员完成洗漱前准备。</p>
+                </div>
+                <div class="profile-card">
+                  <h3>反馈时只点一下</h3>
+                  <p id="learningCue">重点记录老人是否因“女儿来访”线索而放松。</p>
+                </div>
+                <div class="profile-card">
+                  <h3>风险标签</h3>
+                  <div class="tag-row" id="actionRiskTags"></div>
+                </div>
+                <div class="profile-card">
+                  <h3>安全边界</h3>
+                  <p>AI 只是辅助提醒。涉及诊断、用药、急救、约束或高风险转移时，遵循机构流程并联系专业人员。</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-why" aria-labelledby="whyHeading">
+          <div class="two-column">
+            <div class="section-panel">
+              <div class="section-heading">
+                <div>
+                  <h2 id="whyHeading">Why 建议依据</h2>
+                  <p id="whyIntro">展示本建议引用的关键 Evidence，包含来源、时间和置信说明。</p>
+                </div>
+                <span class="tag success" id="whyConfidenceTag">依据充分</span>
+              </div>
+
+              <div class="timeline" id="evidenceList"></div>
+
+              <div class="confidence-note" id="confidenceNote">
+                置信说明：3 条证据在近 14 天内相互印证，且均与“熟悉物品安抚”和“女儿来访”线索相关。
+              </div>
+
+              <div class="action-buttons" style="margin-top: 18px;">
+                <button class="primary-button" data-view="action" type="button">回到 Action Card</button>
+                <button class="ghost-button" data-view="evidence" type="button">查看完整老人画像</button>
+              </div>
+            </div>
+
+            <aside class="section-panel">
+              <div class="section-heading">
+                <div>
+                  <h3>AI 推理摘要</h3>
+                  <p>从证据到行动的可追溯解释。</p>
+                </div>
+              </div>
+              <div class="profile-summary">
+                <div class="profile-card">
+                  <h3>推理链路</h3>
+                  <p id="reasoningSummary">近期观察显示老人早晨易因寻找红围巾焦虑；生命故事提示红围巾与女儿有关；家属输入确认“等女儿来”可安抚。因而建议以红围巾作为过渡线索。</p>
+                </div>
+                <div class="profile-card">
+                  <h3>安全判断</h3>
+                  <p id="safetyReason">建议仅为沟通与情绪安抚策略，不涉及诊断、用药或约束措施。</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-feedback" aria-labelledby="feedbackHeading">
+          <div class="feedback-grid">
+            <form class="feedback-panel" id="feedbackForm">
+              <div class="section-heading">
+                <div>
+                  <h2 id="feedbackHeading">Feedback 护理反馈</h2>
+                  <p id="feedbackTaskLine">记录本次 Action Card 的有效性和新观察。</p>
+                </div>
+                <span class="tag neutral" id="feedbackCardTag">未提交</span>
+              </div>
+
+              <div class="choice-grid" role="group" aria-label="建议有效性">
+                <button class="effect-choice active" data-effect="有效" type="button">
+                  <strong>有效</strong>
+                  <span>已按此执行，老人配合</span>
+                </button>
+                <button class="effect-choice" data-effect="部分有效" type="button">
+                  <strong>有偏差</strong>
+                  <span>有帮助，但现场要调整</span>
+                </button>
+                <button class="effect-choice" data-effect="无效" type="button">
+                  <strong>不适用</strong>
+                  <span>老人拒绝或风险升高</span>
+                </button>
+              </div>
+
+              <div class="field-group">
+                <label>一键观察（可多选）</label>
+                <div class="quick-chip-grid" id="observationChips" role="group" aria-label="快速观察">
+                  <button class="quick-chip active" data-observation="愿意配合" type="button">愿意配合</button>
+                  <button class="quick-chip" data-observation="情绪变好" type="button">情绪变好</button>
+                  <button class="quick-chip" data-observation="仍然拒绝" type="button">仍然拒绝</button>
+                  <button class="quick-chip" data-observation="重复询问" type="button">重复询问</button>
+                  <button class="quick-chip" data-observation="想找家属" type="button">想找家属</button>
+                  <button class="quick-chip" data-observation="需护士查看" type="button">需护士查看</button>
+                </div>
+                <p class="helper-text">为年长护工减少输入：点选即可，文字和语音都不是必填。</p>
+              </div>
+
+              <div class="voice-note-panel">
+                <button class="voice-button" type="button" id="voiceNoteButton">语音<br />一句话</button>
+                <div>
+                  <strong>补充观察（可选）</strong>
+                  <p id="voiceNoteText">未补充。需要时点左侧按钮，模拟记录 15 秒内的一句话。</p>
+                </div>
+              </div>
+
+              <div class="field-group compact-note">
+                <label for="quickNote">必要时手写几个字（可选）</label>
+                <textarea id="quickNote" placeholder="例如：仍找红围巾；或留空直接提交。"></textarea>
+              </div>
+
+              <div class="action-buttons">
+                <button class="primary-button" type="submit">提交反馈</button>
+                <button class="ghost-button" type="button" id="skipFeedback">跳过补充，直接提交</button>
+              </div>
+
+              <div class="feedback-status" id="feedbackStatus" aria-live="polite"></div>
+            </form>
+
+            <aside class="section-panel">
+              <div class="section-heading">
+                <div>
+                  <h3>反馈会如何进入学习闭环</h3>
+                  <p>反馈写入老人时间线，并影响后续建议排序或触发人工复核。</p>
+                </div>
+              </div>
+              <div class="timeline" id="feedbackTimeline">
+                <div class="timeline-item">
+                  <div class="timeline-time">09:08</div>
+                  <div class="timeline-content">
+                    <h3>上次反馈</h3>
+                    <p>“播放沪剧片段后，刘伯愿意多吃半碗粥。”</p>
+                    <span class="tag success">已写入画像</span>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-time">08:40</div>
+                  <div class="timeline-content">
+                    <h3>待补充</h3>
+                    <p>本次 Action Card 尚未提交反馈。</p>
+                    <span class="tag neutral">等待护理员记录</span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-evidence" aria-labelledby="evidenceHeading">
+          <div class="two-column">
+            <div class="evidence-panel">
+              <div class="profile-header">
+                <div class="big-avatar" id="profileAvatar">周</div>
+                <div>
+                  <h2 id="evidenceHeading">周雅琴</h2>
+                  <p id="profileSubtitle">82 岁 · 房间 302 · 轻中度认知障碍 · 女儿为主要联系人</p>
+                </div>
+              </div>
+
+              <div class="kv-grid" id="profileFacts"></div>
+
+              <div class="info-bands" style="margin-top: 16px;">
+                <div class="info-band">
+                  <h3>偏好</h3>
+                  <div class="tag-row" id="preferenceTags"></div>
+                </div>
+                <div class="info-band">
+                  <h3>禁忌与触发点</h3>
+                  <div class="tag-row" id="avoidTags"></div>
+                </div>
+                <div class="info-band">
+                  <h3>家属输入摘要</h3>
+                  <ul class="summary-list" id="familySummary"></ul>
+                </div>
+              </div>
+            </div>
+
+            <aside class="section-panel">
+              <div class="section-heading">
+                <div>
+                  <h3>近期观察</h3>
+                  <p>用于生成 Action Card 的 Evidence 时间线。</p>
+                </div>
+                <span class="tag status">近 14 天</span>
+              </div>
+              <div class="timeline" id="profileTimeline"></div>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="移动端导航">
+    <button class="nav-button active" data-view="today" type="button"><span class="nav-icon">T</span><span>Today</span></button>
+    <button class="nav-button" data-view="action" type="button"><span class="nav-icon">A</span><span>行动</span></button>
+    <button class="nav-button" data-view="why" type="button"><span class="nav-icon">W</span><span>依据</span></button>
+    <button class="nav-button" data-view="feedback" type="button"><span class="nav-icon">F</span><span>反馈</span></button>
+    <button class="nav-button" data-view="evidence" type="button"><span class="nav-icon">E</span><span>画像</span></button>
+  </nav>
+
+  <script>
+    const elders = {
+      zhou: {
+        id: "zhou",
+        name: "周雅琴",
+        initial: "周",
+        age: 82,
+        room: "302",
+        status: "轻中度认知障碍",
+        contact: "女儿 周敏",
+        mobility: "可扶行，晨间需看护",
+        diet: "软食，偏好温热饮",
+        preferenceTags: ["红围巾", "沪剧", "女儿来访", "温水洗脸", "慢节奏说明"],
+        avoidTags: ["不要直接否定记忆", "避免多人同时催促", "不讨论搬家", "夜间强光"],
+        familySummary: [
+          "女儿反馈：红围巾是老人退休时女儿送的礼物，能带来安全感。",
+          "家属建议：焦虑时可说“等会儿女儿来看您”，通常能让她愿意配合。",
+          "禁忌：不要说“您记错了”，老人会明显抵触。"
+        ],
+        observations: [
+          { time: "今天 07:48", title: "晨间重复寻找红围巾", text: "老人反复摸外套口袋，询问“围巾是不是丢了”，语速加快。", tag: "观察记录" },
+          { time: "昨天 18:20", title: "晚餐后情绪平稳", text: "护理员提到女儿周末会来，老人点头并愿意回房休息。", tag: "护理反馈" },
+          { time: "07-03 09:10", title: "洗漱触发抵触", text: "直接邀请洗脸时拒绝，改为先整理围巾后愿意进入洗漱间。", tag: "历史反馈" }
+        ]
+      },
+      liu: {
+        id: "liu",
+        name: "刘建国",
+        initial: "刘",
+        age: 76,
+        room: "218",
+        status: "轻度吞咽风险",
+        contact: "儿子 刘洋",
+        mobility: "可独立坐起，午后易疲劳",
+        diet: "半流质，需小口慢食",
+        preferenceTags: ["沪剧片段", "深色餐具", "饭前热毛巾", "被称呼刘老师"],
+        avoidTags: ["进食催促", "冷粥", "边吃边谈复杂话题", "药物建议需护士确认"],
+        familySummary: [
+          "儿子反馈：父亲年轻时教语文，被称为“刘老师”会更愿意回应。",
+          "近期变化：早餐时如果播放老沪剧，进食配合度更高。",
+          "禁忌：不要在吞咽不顺时继续劝多吃，需按机构流程通知护士。"
+        ],
+        observations: [
+          { time: "今天 08:55", title: "早餐进食变慢", text: "喝粥时停顿次数增加，未呛咳，精神一般。", tag: "观察记录" },
+          { time: "昨天 09:02", title: "沪剧安抚有效", text: "播放短片后愿意继续进食，完成约 70%。", tag: "护理反馈" },
+          { time: "07-02 08:40", title: "冷粥引发拒绝", text: "表示“太凉”，更换温热后配合度提升。", tag: "家属输入" }
+        ]
+      },
+      chen: {
+        id: "chen",
+        name: "陈淑芬",
+        initial: "陈",
+        age: 88,
+        room: "115",
+        status: "跌倒高风险",
+        contact: "孙女 林可",
+        mobility: "夜间起身需陪同",
+        diet: "清淡软食",
+        preferenceTags: ["靠窗座位", "蓝色外套", "先说明再触碰", "午后散步"],
+        avoidTags: ["独自下床", "湿滑地面", "突然搀扶", "高风险需人工确认"],
+        familySummary: [
+          "孙女反馈：老人不喜欢别人突然扶她，需先解释再伸手。",
+          "近期变化：夜间起身次数增加，家属担心跌倒。",
+          "安全要求：涉及下床、转移和异常疼痛时需遵循机构流程。"
+        ],
+        observations: [
+          { time: "今天 06:30", title: "夜间起身两次", text: "床边报警两次，第二次表示想去洗手间。", tag: "设备记录" },
+          { time: "昨天 14:20", title: "转移前解释更有效", text: "先说明步骤后，老人愿意扶助行器起身。", tag: "护理反馈" },
+          { time: "07-01 21:48", title: "低置信提示", text: "脚踝不适描述不清，已建议护士评估。", tag: "人工确认" }
+        ]
+      }
+    };
+
+    const tasks = [
+      {
+        id: "t1",
+        elderId: "zhou",
+        time: "08:30",
+        title: "洗漱协助",
+        status: "待执行",
+        priority: "高优先",
+        risks: ["焦虑", "重复询问"],
+        confidence: 78,
+        confidenceLabel: "中高",
+        cardReady: true,
+        actionTitle: "先用“找红围巾”的熟悉线索，引导她完成洗漱前准备",
+        context: "适用于拒绝洗漱、焦虑寻找物品、重复询问的早班场景。",
+        mainAction: "用她熟悉的物品作为过渡线索，先降低焦虑，再进入洗漱动作。",
+        steps: [
+          "先陪她确认红围巾已放在床头抽屉，避免直接说“没有丢”。",
+          "把洗漱动作拆成一个小目标：先坐到洗漱台前，用温水擦手。",
+          "完成后用女儿来访线索收尾，邀请她一起整理衣领。"
+        ],
+        script: "“周阿姨，我们先把红围巾放好，再一起洗把脸，等会儿您女儿来的时候看起来精神些。”",
+        expected: "老人焦虑降低，愿意跟随护理员完成洗漱前准备。",
+        learningCue: "重点记录老人是否因“女儿来访”线索而放松。",
+        reminder: "先稳定情绪，不要直接纠正“围巾丢了”的判断。",
+        safetyLevel: "medium",
+        safetyTitle: "需遵循机构流程",
+        safetyText: "本建议不涉及诊断或用药。若出现胸痛、跌倒、急性意识改变，请停止执行并遵循机构应急流程。",
+        confidenceNote: "置信说明：3 条证据在近 14 天内相互印证，且均与“熟悉物品安抚”和“女儿来访”线索相关。",
+        reasoning: "近期观察显示老人早晨易因寻找红围巾焦虑；生命故事提示红围巾与女儿有关；家属输入确认“等女儿来”可安抚。因而建议以红围巾作为过渡线索。",
+        safetyReason: "建议为沟通与情绪安抚策略，不涉及诊断、用药或约束措施。",
+        evidence: [
+          { type: "生命故事", source: "家属语音 · 女儿周敏", time: "2026-07-02 19:30", confidence: "高", text: "红围巾是女儿送给老人的退休礼物，老人常把它当作安全感线索。" },
+          { type: "观察记录", source: "护理员陈晓岚", time: "2026-07-06 07:48", confidence: "中高", text: "老人反复摸外套口袋寻找红围巾，语速加快，暂未出现跌倒风险。" },
+          { type: "历史反馈", source: "早班反馈", time: "2026-07-03 09:10", confidence: "高", text: "先整理围巾再进入洗漱间，比直接邀请洗脸更有效。" }
+        ]
+      },
+      {
+        id: "t2",
+        elderId: "liu",
+        time: "09:00",
+        title: "早餐陪餐",
+        status: "执行中",
+        priority: "中优先",
+        risks: ["吞咽风险", "需护士知情"],
+        confidence: 64,
+        confidenceLabel: "中",
+        cardReady: true,
+        actionTitle: "以“刘老师”和沪剧片段建立回应，再用小口慢食节奏陪餐",
+        context: "适用于早餐配合度下降、进食速度变慢但无急性呛咳的场景。",
+        mainAction: "先建立被尊重的称呼和熟悉声音，再把进食节奏控制在小口、慢咽、短暂停顿。",
+        steps: [
+          "坐在老人侧前方，称呼“刘老师”，确认粥温热。",
+          "播放 30 秒以内的沪剧片段，待老人看向护理员后再递勺。",
+          "每 2 至 3 口停顿观察吞咽状态，若咳嗽或声音湿哑，暂停并通知护士。"
+        ],
+        script: "“刘老师，粥已经温好了。我们听一小段沪剧，您慢慢来，一口一口不着急。”",
+        expected: "老人愿意开始进食，护理员能及时发现吞咽异常信号。",
+        learningCue: "记录沪剧片段是否提升配合度，以及是否出现咳嗽、声音变化。",
+        reminder: "不要催促进食；出现呛咳、湿哑或呼吸异常时立即停止陪餐并通知护士。",
+        safetyLevel: "high",
+        safetyTitle: "需人工确认 / 不替代专业医疗判断",
+        safetyText: "涉及吞咽和进食安全。Action Card 只提供沟通与观察节奏，不能替代护士评估、医嘱或机构陪餐流程。",
+        confidenceNote: "置信说明：家属输入与历史反馈一致，但今日吞咽状态存在变化，需人工观察确认。",
+        reasoning: "家属和历史反馈显示“刘老师”称呼与沪剧能提高回应；今日记录显示进食变慢但无呛咳，因此建议以熟悉线索开启陪餐，同时把安全观察置前。",
+        safetyReason: "该任务涉及吞咽安全，任何疑似呛咳、声音湿哑或呼吸异常都必须遵循机构流程通知护士。",
+        evidence: [
+          { type: "家属输入", source: "儿子刘洋 · 文字", time: "2026-07-04 20:05", confidence: "高", text: "父亲被称为“刘老师”时更愿意回应，喜欢饭前听沪剧。" },
+          { type: "观察记录", source: "早班陪餐", time: "2026-07-06 08:55", confidence: "中", text: "早餐进食变慢，停顿次数增加，暂未观察到呛咳。" },
+          { type: "历史反馈", source: "护理员王宁", time: "2026-07-05 09:02", confidence: "中高", text: "播放沪剧片段后，老人愿意继续进食，完成约 70%。" }
+        ]
+      },
+      {
+        id: "t3",
+        elderId: "chen",
+        time: "10:20",
+        title: "如厕转移",
+        status: "需确认",
+        priority: "高风险",
+        risks: ["跌倒高风险", "低置信"],
+        confidence: 42,
+        confidenceLabel: "低",
+        cardReady: true,
+        actionTitle: "暂停自动建议，先进行人工确认并按机构转移流程执行",
+        context: "适用于夜间起身增多、如厕转移、跌倒风险较高的场景。",
+        mainAction: "不要依赖 AI 自动建议完成转移；先通知当班主管或护士确认，再按机构双人协助流程执行。",
+        steps: [
+          "确认地面干燥、助行器位置和呼叫铃可用，避免老人独自起身。",
+          "向老人说明下一步动作，征得回应后再触碰或搀扶。",
+          "若老人表示疼痛、眩晕或站立不稳，暂停转移并通知专业人员。"
+        ],
+        script: "“陈奶奶，我先和护士确认一下，再陪您慢慢起身。我们一步一步来，您不用着急。”",
+        expected: "降低独自起身和突然搀扶带来的跌倒风险。",
+        learningCue: "记录触发人工确认的原因、老人回应和专业人员处理结果。",
+        reminder: "高风险转移必须遵循机构流程，不输出替代专业判断的处置结论。",
+        safetyLevel: "high",
+        safetyTitle: "需人工确认 / 遵循机构流程",
+        safetyText: "该建议触发跌倒高风险和低置信规则。AI 不给出独立转移决策，不替代专业医疗或护理判断。",
+        confidenceNote: "依据不足，请人工确认：近期夜间起身增加，脚踝不适描述不清，当前风险高于 AI 可独立建议范围。",
+        reasoning: "可引用证据提示转移前解释有效，但同时存在夜间起身增加和不适描述不清。因风险和置信度限制，本卡片只输出流程边界和人工确认动作。",
+        safetyReason: "跌倒高风险、低置信和可能疼痛均属于安全边界触发条件，必须由机构流程覆盖。",
+        evidence: [
+          { type: "设备记录", source: "床边报警", time: "2026-07-06 06:30", confidence: "中", text: "夜间起身报警两次，第二次表示想去洗手间。" },
+          { type: "护理反馈", source: "午班护理员", time: "2026-07-05 14:20", confidence: "中高", text: "先说明步骤后，老人愿意扶助行器起身。" },
+          { type: "人工确认", source: "护士交接", time: "2026-07-01 21:48", confidence: "低", text: "老人脚踝不适描述不清，需在转移前确认疼痛和站立稳定性。" }
+        ]
+      },
+      {
+        id: "t4",
+        elderId: "zhou",
+        time: "14:00",
+        title: "午后活动提醒",
+        status: "未生成",
+        priority: "普通",
+        risks: ["情绪波动"],
+        confidence: 58,
+        confidenceLabel: "中",
+        cardReady: false,
+        actionTitle: "先补充午后观察，再生成活动提醒 Action Card",
+        context: "该任务缺少今日午后状态证据，建议先补充观察。",
+        mainAction: "在生成建议前，先记录午餐后情绪、睡眠和是否仍寻找红围巾。",
+        steps: [
+          "查看老人午餐后是否小睡，记录精神状态。",
+          "询问是否愿意听一段沪剧或整理围巾。",
+          "若仍焦虑，优先使用早班已验证的女儿来访线索。"
+        ],
+        script: "“周阿姨，下午我们先坐一会儿，您想听沪剧还是整理一下围巾？”",
+        expected: "补足午后 Evidence，避免用早晨状态直接套用到下午。",
+        learningCue: "记录午后情绪变化和活动偏好。",
+        reminder: "证据不足时不要把建议包装成确定结论。",
+        safetyLevel: "medium",
+        safetyTitle: "依据不足，请人工确认",
+        safetyText: "当前建议置信度中等，需先补充观察；不替代专业医疗判断。",
+        confidenceNote: "证据不足：已有证据主要来自早班洗漱场景，午后活动状态尚未更新。",
+        reasoning: "老人早晨焦虑线索明确，但午后活动受午睡、用餐和家属来访预期影响，需要新增观察后再排序建议。",
+        safetyReason: "低证据任务必须提示人工确认，避免将一个场景的行动建议机械迁移到另一个场景。",
+        evidence: [
+          { type: "历史反馈", source: "早班护理员", time: "2026-07-06 08:45", confidence: "中", text: "早晨红围巾线索有效，但尚无午后状态记录。" },
+          { type: "生命故事", source: "家属语音", time: "2026-07-02 19:30", confidence: "高", text: "老人喜欢午后听沪剧，但焦虑时需要先稳定情绪。" }
+        ]
+      }
+    ];
+
+    const state = {
+      selectedTaskId: "t1",
+      selectedEffect: "有效",
+      selectedObservations: ["愿意配合"],
+      voiceNote: "",
+      actionVoicePlaying: false,
+      weakNetwork: false,
+      feedbackSubmitted: false
+    };
+
+    const pageMeta = {
+      today: ["Today 今日任务", "从今日照护对象开始，快速进入可执行行动建议。"],
+      action: ["Action Card 行动建议", "先听 20 秒语音要点，再照着一句行动和三步提示执行。"],
+      why: ["Why 建议依据", "查看 AI 建议引用的 Evidence 和置信说明。"],
+      feedback: ["Feedback 护理反馈", "用最短路径把执行结果写回老人画像。"],
+      evidence: ["Evidence 老人画像", "生命故事、观察记录、家属输入和反馈构成知识底座。"]
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function currentTask() {
+      return tasks.find((task) => task.id === state.selectedTaskId) || tasks[0];
+    }
+
+    function currentElder() {
+      return elders[currentTask().elderId];
+    }
+
+    function tagClass(value) {
+      if (["高风险", "跌倒高风险", "吞咽风险", "低置信", "需护士知情"].some((key) => value.includes(key))) return "danger";
+      if (["高优先", "焦虑", "重复询问", "情绪波动"].some((key) => value.includes(key))) return "warning";
+      if (["待执行", "执行中", "已准备", "依据充分"].some((key) => value.includes(key))) return "success";
+      return "status";
+    }
+
+    function renderTags(items, target) {
+      target.innerHTML = items.map((item) => `<span class="tag ${tagClass(item)}">${item}</span>`).join("");
+    }
+
+    function renderStats() {
+      const total = tasks.length;
+      const ready = tasks.filter((task) => task.cardReady).length;
+      const manual = tasks.filter((task) =>
+        task.safetyLevel === "high" ||
+        task.confidence < 50 ||
+        task.status.includes("需确认") ||
+        task.risks.some((risk) => risk.includes("低置信") || risk.includes("高风险"))
+      ).length;
+      $("#readySummary").textContent = `${ready}/${total} 已准备`;
+      $("#taskCount").textContent = total;
+      $("#manualCount").textContent = manual;
+      $("#feedbackRate").textContent = state.feedbackSubmitted ? "83%" : "80%";
+    }
+
+    function renderTaskList() {
+      const list = $("#taskList");
+      list.innerHTML = tasks.map((task) => {
+        const elder = elders[task.elderId];
+        const active = task.id === state.selectedTaskId ? " active" : "";
+        const readyTag = task.cardReady ? "Action 已生成" : "需补充 Evidence";
+        return `
+          <button class="task-card${active}" type="button" data-task-id="${task.id}" aria-label="打开 ${elder.name} ${task.title}">
+            <span>
+              <span class="task-meta">
+                <span class="tag ${tagClass(task.priority)}">${task.priority}</span>
+                <span class="tag ${tagClass(task.status)}">${task.status}</span>
+                <span class="tag neutral">${readyTag}</span>
+              </span>
+              <h3 class="task-title">${task.time} · ${elder.name} · ${task.title}</h3>
+              <p class="task-desc">${task.actionTitle}</p>
+              <span class="tag-row" style="margin-top: 10px;">
+                ${task.risks.map((risk) => `<span class="tag ${tagClass(risk)}">${risk}</span>`).join("")}
+              </span>
+            </span>
+            <span class="task-side">
+              <strong>${task.confidence}%</strong>
+              <span>AI 置信度 · ${task.confidenceLabel}</span>
+            </span>
+          </button>
+        `;
+      }).join("");
+
+      $$(".task-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedTaskId = button.dataset.taskId;
+          state.feedbackSubmitted = false;
+          state.actionVoicePlaying = false;
+          renderAll();
+          switchView("action");
+        });
+      });
+    }
+
+    function renderActionPreview() {
+      const task = currentTask();
+      const elder = currentElder();
+      $("#todayAvatar").textContent = elder.initial;
+      $("#todayElderLine").textContent = `${elder.name} · ${elder.age} 岁 · ${elder.status}`;
+      $("#todayConfidenceLabel").textContent = `AI 置信度 ${task.confidence}% · ${task.confidenceLabel}`;
+      $("#todayMeter").style.width = `${task.confidence}%`;
+      $("#todayActionTitle").textContent = task.actionTitle;
+      $("#todayActionSubtitle").textContent = task.context;
+      $("#todayScript").textContent = task.script;
+      $("#todaySafety").classList.toggle("high", task.safetyLevel === "high");
+      $("#todaySafetyTitle").textContent = task.safetyTitle;
+      $("#todaySafetyText").textContent = task.safetyText;
+    }
+
+    function buildVoiceSummary(task, elder) {
+      const firstStep = task.steps[0] || task.mainAction;
+      const safety = task.safetyLevel === "high"
+        ? "这条建议需要人工确认，遇到异常马上按机构流程。"
+        : "如果出现异常，停止执行并按机构流程处理。";
+      return `${elder.name}，${task.title}。先做：${task.mainAction} 第一步：${firstStep} 话术可以直接照着说。${safety}`;
+    }
+
+    function renderActionVoice() {
+      const panel = $("#voiceActionPanel");
+      const button = $("#playActionVoice");
+      const stateLabel = $("#voiceState");
+      if (!panel || !button || !stateLabel) return;
+      panel.classList.toggle("playing", state.actionVoicePlaying);
+      button.innerHTML = state.actionVoicePlaying ? "停止<span>播报中</span>" : "播报<span>20 秒要点</span>";
+      stateLabel.textContent = state.actionVoicePlaying ? "播报中" : "可直接播报";
+      stateLabel.className = `tag ${state.actionVoicePlaying ? "warning" : "success"}`;
+    }
+
+    function renderActionCard() {
+      const task = currentTask();
+      const elder = currentElder();
+      $("#actionAvatar").textContent = elder.initial;
+      $("#actionElderLine").textContent = `${elder.name} · ${elder.age} 岁 · 房间 ${elder.room}`;
+      $("#actionConfidenceLabel").textContent = `AI 置信度 ${task.confidence}% · ${task.confidenceLabel}`;
+      $("#actionMeter").style.width = `${task.confidence}%`;
+      $("#actionHeading").textContent = task.actionTitle;
+      $("#actionContext").textContent = `任务：${task.time} ${task.title} · 当前状态：${task.status}`;
+      $("#voiceSummary").textContent = buildVoiceSummary(task, elder);
+      $("#mainAction").textContent = task.mainAction;
+      $("#stepList").innerHTML = task.steps.map((step) => `<li>${step}</li>`).join("");
+      $("#scriptBox").textContent = task.script;
+      $("#expectedResult").textContent = task.expected;
+      $("#learningCue").textContent = task.learningCue;
+      $("#careReminder").textContent = task.reminder;
+      $("#taskStatusLine").textContent = `${task.time} · ${task.title} · ${task.cardReady ? "建议已生成" : "等待补充证据"}`;
+      $("#taskStateTag").textContent = task.status;
+      $("#taskStateTag").className = `tag ${tagClass(task.status)}`;
+      renderTags(task.risks, $("#actionRiskTags"));
+      $("#actionSafety").classList.toggle("high", task.safetyLevel === "high");
+      $("#actionSafetyTitle").textContent = task.safetyTitle;
+      $("#actionSafetyText").textContent = task.safetyText;
+      renderActionVoice();
+    }
+
+    function renderWhy() {
+      const task = currentTask();
+      $("#whyIntro").textContent = `当前 Action Card：${task.actionTitle}`;
+      const enough = task.confidence >= 60 && task.evidence.length >= 3;
+      $("#whyConfidenceTag").textContent = enough ? "依据充分" : "依据不足";
+      $("#whyConfidenceTag").className = `tag ${enough ? "success" : "warning"}`;
+      $("#evidenceList").innerHTML = task.evidence.map((item) => `
+        <article class="timeline-item">
+          <div class="timeline-time">${item.time}</div>
+          <div class="timeline-content">
+            <h3>${item.type}</h3>
+            <p>${item.text}</p>
+            <div class="tag-row">
+              <span class="tag status">${item.source}</span>
+              <span class="tag ${item.confidence === "低" ? "danger" : "success"}">置信 ${item.confidence}</span>
+            </div>
+          </div>
+        </article>
+      `).join("");
+      $("#confidenceNote").textContent = task.confidenceNote;
+      $("#reasoningSummary").textContent = task.reasoning;
+      $("#safetyReason").textContent = task.safetyReason;
+    }
+
+    function renderFeedback() {
+      const task = currentTask();
+      const elder = currentElder();
+      $("#feedbackTaskLine").textContent = `${elder.name} · ${task.time} ${task.title} · ${task.actionTitle}`;
+      $("#feedbackCardTag").textContent = state.feedbackSubmitted ? (state.weakNetwork ? "待同步" : "已提交") : "未提交";
+      $("#feedbackCardTag").className = `tag ${state.feedbackSubmitted ? (state.weakNetwork ? "warning" : "success") : "neutral"}`;
+      $$(".effect-choice").forEach((button) => {
+        button.classList.toggle("active", button.dataset.effect === state.selectedEffect);
+      });
+      $$(".quick-chip[data-observation]").forEach((button) => {
+        button.classList.toggle("active", state.selectedObservations.includes(button.dataset.observation));
+      });
+      $("#voiceNoteText").textContent = state.voiceNote || "未补充。需要时点左侧按钮，模拟记录 15 秒内的一句话。";
+    }
+
+    function renderProfile() {
+      const elder = currentElder();
+      $("#profileAvatar").textContent = elder.initial;
+      $("#evidenceHeading").textContent = elder.name;
+      $("#profileSubtitle").textContent = `${elder.age} 岁 · 房间 ${elder.room} · ${elder.status} · ${elder.contact}`;
+      $("#profileFacts").innerHTML = `
+        <div class="kv"><span>行动能力</span><strong>${elder.mobility}</strong></div>
+        <div class="kv"><span>饮食与照护</span><strong>${elder.diet}</strong></div>
+        <div class="kv"><span>主要联系人</span><strong>${elder.contact}</strong></div>
+        <div class="kv"><span>当前任务</span><strong>${currentTask().title}</strong></div>
+      `;
+      renderTags(elder.preferenceTags, $("#preferenceTags"));
+      renderTags(elder.avoidTags, $("#avoidTags"));
+      $("#familySummary").innerHTML = elder.familySummary.map((item) => `<li>${item}</li>`).join("");
+      $("#profileTimeline").innerHTML = elder.observations.map((item) => `
+        <article class="timeline-item">
+          <div class="timeline-time">${item.time}</div>
+          <div class="timeline-content">
+            <h4>${item.title}</h4>
+            <p>${item.text}</p>
+            <span class="tag status">${item.tag}</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderAll() {
+      renderStats();
+      renderTaskList();
+      renderActionPreview();
+      renderActionCard();
+      renderWhy();
+      renderFeedback();
+      renderProfile();
+    }
+
+    function switchView(viewName) {
+      const meta = pageMeta[viewName] || pageMeta.today;
+      $$(".view").forEach((view) => view.classList.toggle("active", view.id === `view-${viewName}`));
+      $$(".nav-button[data-view]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === viewName);
+      });
+      $("#pageTitle").textContent = meta[0];
+      $("#pageSubtitle").textContent = meta[1];
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function updateSyncUI() {
+      const text = state.weakNetwork ? "弱网 · 本地缓存中" : "离线缓存可用 · 09:22";
+      $("#topSync").textContent = text;
+      $("#sidebarSync").textContent = state.weakNetwork ? "待同步" : "刚刚同步";
+    }
+
+    $$(".nav-button[data-view], .primary-button[data-view], .secondary-button[data-view], .ghost-button[data-view]").forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+
+    $("#playActionVoice").addEventListener("click", () => {
+      state.actionVoicePlaying = !state.actionVoicePlaying;
+      renderActionVoice();
+    });
+
+    $$(".effect-choice").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.selectedEffect = button.dataset.effect;
+        renderFeedback();
+      });
+    });
+
+    $$(".quick-chip[data-observation]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.dataset.observation;
+        if (state.selectedObservations.includes(value)) {
+          state.selectedObservations = state.selectedObservations.filter((item) => item !== value);
+        } else {
+          state.selectedObservations = [...state.selectedObservations, value];
+        }
+        renderFeedback();
+      });
+    });
+
+    $("#voiceNoteButton").addEventListener("click", () => {
+      const elder = currentElder();
+      state.voiceNote = `${elder.name}今天回应较慢，但听到熟悉称呼后愿意点头。`;
+      renderFeedback();
+    });
+
+    $("#simulatePending").addEventListener("click", () => {
+      state.weakNetwork = !state.weakNetwork;
+      updateSyncUI();
+      if (state.feedbackSubmitted) {
+        renderFeedback();
+      }
+    });
+
+    $("#skipFeedback").addEventListener("click", () => {
+      state.selectedObservations = [];
+      state.voiceNote = "";
+      $("#quickNote").value = "";
+      $("#feedbackForm").requestSubmit();
+    });
+
+    $("#feedbackForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      state.feedbackSubmitted = true;
+      const task = currentTask();
+      const status = $("#feedbackStatus");
+      const now = new Date();
+      const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const note = $("#quickNote").value.trim();
+      const observations = state.selectedObservations.length ? state.selectedObservations.join("、") : "未选择观察项";
+      const reaction = [observations, state.voiceNote, note].filter(Boolean).join("；") || "仅提交一键评价，未补充观察。";
+      const message = state.weakNetwork
+        ? "反馈已本地暂存，当前弱网，系统标记为待同步。"
+        : "反馈提交成功，已写入老人时间线并关联当前 Action Card。全程可在 5 秒内完成。";
+
+      status.className = `feedback-status show ${state.weakNetwork ? "pending" : "success"}`;
+      status.textContent = message;
+
+      $("#feedbackTimeline").insertAdjacentHTML("afterbegin", `
+        <div class="timeline-item">
+          <div class="timeline-time">${time}</div>
+          <div class="timeline-content">
+            <h3>${task.title}反馈 · ${state.selectedEffect}</h3>
+            <p>${reaction}</p>
+            <span class="tag ${state.weakNetwork ? "warning" : "success"}">${state.weakNetwork ? "待同步" : "已写入画像"}</span>
+          </div>
+        </div>
+      `);
+      renderFeedback();
+      renderStats();
+    });
+
+    renderAll();
+    updateSyncUI();
+  </script>
+</body>
+</html>
