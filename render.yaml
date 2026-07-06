@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: careaction-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && python server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        sync: false
+      - key: AI_API_BASE
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        sync: false
+      - key: EXTERNAL_SOURCE_TYPE
+        value: none
+      - key: EXTERNAL_API_RECORDS_URL
+        sync: false
+      - key: EXTERNAL_API_TOKEN
+        sync: false
