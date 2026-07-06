@@ -1,0 +1,47 @@
+{
+    "id" : "H50454507",
+    "name" : "CareAction",
+    "version" : {
+        "name" : "1.0.0",
+        "code" : 100
+    },
+    "description" : "AI 照护行动助手",
+    "launch_path" : "index.html",
+    "developer" : {
+        "name" : "CareAction",
+        "email" : "",
+        "url" : ""
+    },
+    "permissions" : {
+        "Speech" : {
+            "description" : "语音输入"
+        }
+    },
+    "plus" : {
+        "statusbar" : {
+            "immersed" : false,
+            "background" : "#07394f"
+        },
+        "splashscreen" : {
+            "autoclose" : true,
+            "waiting" : false
+        },
+        "distribute" : {
+            "android" : {
+                "packagename" : "careaction.ai.care.assistant",
+                "permissions" : [
+                    "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+                    "<uses-permission android:name=\"android.permission.RECORD_AUDIO\"/>"
+                ],
+                "abiFilters" : [ "armeabi-v7a", "arm64-v8a" ],
+                "minSdkVersion" : 23,
+                "targetSdkVersion" : 35,
+                "usesCleartextTraffic" : true
+            },
+            "google" : {
+                "permissions" : []
+            }
+        }
+    },
+    "screenOrientation" : [ "portrait-primary", "portrait-secondary" ]
+}
