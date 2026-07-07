@@ -1763,6 +1763,605 @@
         width: 100%;
       }
     }
+
+    /* Iteration: caregiver efficiency mode */
+    #caregiverShell {
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    #caregiverShell .nav-list .nav-button[data-view="action"],
+    #caregiverShell .nav-list .nav-button[data-view="why"],
+    #caregiverShell .nav-list .nav-button[data-view="feedback"],
+    #caregiverShell .nav-list .nav-button[data-view="evidence"],
+    #mobileNav .nav-button[data-view="action"],
+    #mobileNav .nav-button[data-view="why"],
+    #mobileNav .nav-button[data-view="feedback"],
+    #mobileNav .nav-button[data-view="evidence"] {
+      display: none;
+    }
+
+    #view-today .dashboard-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    #view-today .dashboard-grid > .action-card {
+      display: none;
+    }
+
+    .operator-card {
+      display: grid;
+      gap: 18px;
+      padding: clamp(18px, 3.5vw, 34px);
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(7, 57, 79, 0.98), rgba(12, 87, 103, 0.96)),
+        var(--sea-900);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .operator-topline,
+    .operator-footer-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .operator-person {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .operator-avatar {
+      display: grid;
+      place-items: center;
+      width: 88px;
+      height: 88px;
+      color: var(--sea-950);
+      background: var(--green-50);
+      border: 4px solid rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      font-size: 38px;
+      font-weight: 900;
+    }
+
+    .operator-person h2 {
+      margin: 0 0 8px;
+      color: #fff;
+      font-size: clamp(38px, 7vw, 76px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .operator-person p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 800;
+    }
+
+    .operator-action {
+      display: grid;
+      gap: 10px;
+      padding: clamp(16px, 3vw, 28px);
+      color: var(--sea-950);
+      background: #fff;
+      border-radius: 8px;
+    }
+
+    .operator-action span {
+      color: var(--muted);
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .operator-action strong {
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .operator-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      gap: 16px;
+    }
+
+    .operator-mini-card {
+      display: grid;
+      gap: 8px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+    }
+
+    .operator-mini-card h3 {
+      margin: 0;
+      color: var(--green-50);
+      font-size: 24px;
+    }
+
+    .operator-mini-card p,
+    .operator-mini-card li {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(22px, 2.5vw, 32px);
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .operator-mini-card ol {
+      margin: 0;
+      padding-left: 1.2em;
+    }
+
+    .operator-safety {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 16px;
+      color: var(--sea-950);
+      background: var(--rose-50);
+      border: 2px solid rgba(151, 67, 72, 0.3);
+      border-radius: 8px;
+      font-size: clamp(22px, 2.6vw, 32px);
+      font-weight: 900;
+    }
+
+    .operator-safety.high {
+      background: #fff0ef;
+      border-color: rgba(151, 67, 72, 0.55);
+    }
+
+    .operator-actions {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .operator-actions button {
+      min-height: 82px;
+      font-size: clamp(22px, 2.7vw, 34px);
+      font-weight: 900;
+    }
+
+    .operator-next {
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 22px;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .demo-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .demo-item {
+      padding: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .demo-item h3 {
+      margin: 0 0 6px;
+      color: var(--sea-950);
+      font-size: 24px;
+    }
+
+    .demo-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.45;
+    }
+
+    .family-confirm-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .family-story-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .family-story-form textarea {
+      min-height: 112px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 20px;
+      resize: vertical;
+    }
+
+    .admin-shell {
+      min-height: 100vh;
+      color: var(--sea-950);
+      background:
+        linear-gradient(180deg, rgba(7, 57, 79, 0.08), rgba(244, 247, 244, 0.96) 320px),
+        var(--canvas);
+    }
+
+    .admin-topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 30px clamp(18px, 4vw, 48px) 22px;
+      background:
+        linear-gradient(135deg, rgba(7, 57, 79, 0.98), rgba(40, 111, 112, 0.96)),
+        var(--sea-900);
+      color: #fff;
+    }
+
+    .admin-eyebrow {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      color: var(--green-50);
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .admin-topbar h1 {
+      margin: 0 0 8px;
+      color: #fff;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .admin-topbar p {
+      max-width: 760px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 21px;
+      line-height: 1.45;
+    }
+
+    .admin-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .admin-actions button {
+      width: auto;
+      min-width: 136px;
+    }
+
+    .admin-content {
+      width: min(1320px, 100%);
+      margin: 0 auto;
+      padding: 22px clamp(14px, 3vw, 34px) 42px;
+    }
+
+    .admin-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(520px, 1.1fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .admin-hero > div:first-child,
+    .admin-metric-grid,
+    .admin-panel {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .admin-hero > div:first-child {
+      padding: 24px;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .admin-hero h2 {
+      margin: 0;
+      color: var(--sea-950);
+      font-size: 32px;
+      line-height: 1.18;
+    }
+
+    .admin-hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.45;
+    }
+
+    .admin-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      overflow: hidden;
+      background: var(--line);
+    }
+
+    .admin-metric {
+      display: grid;
+      gap: 8px;
+      padding: 22px 18px;
+      background: #fff;
+    }
+
+    .admin-metric span {
+      color: var(--muted);
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .admin-metric strong {
+      color: var(--sea-950);
+      font-size: 42px;
+      line-height: 1;
+    }
+
+    .admin-roster-panel,
+    .admin-panel {
+      padding: 20px;
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .admin-panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .admin-panel h2,
+    .admin-roster-panel h2 {
+      margin: 0 0 6px;
+      color: var(--sea-950);
+      font-size: 27px;
+    }
+
+    .admin-panel p,
+    .admin-roster-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.42;
+    }
+
+    .admin-roster {
+      display: grid;
+      gap: 14px;
+    }
+
+    .admin-elder-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.75fr) minmax(300px, 1.15fr) minmax(280px, 1fr) minmax(220px, 0.8fr);
+      gap: 14px;
+      align-items: stretch;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .admin-elder-profile {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .admin-elder-avatar {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      color: #fff;
+      background: var(--sea-900);
+      border-radius: 50%;
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .admin-elder-profile h3,
+    .admin-suggestion-block h3,
+    .admin-mini-section h3 {
+      margin: 0;
+      color: var(--sea-950);
+      font-size: 23px;
+      line-height: 1.2;
+    }
+
+    .admin-elder-profile p,
+    .admin-suggestion-block p,
+    .admin-mini-section p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.4;
+    }
+
+    .admin-suggestion-block {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--sea-950), #286f70);
+      border-radius: 8px;
+    }
+
+    .admin-suggestion-block h3,
+    .admin-suggestion-block p {
+      color: #fff;
+    }
+
+    .admin-suggestion-block .script {
+      padding: 12px;
+      color: var(--sea-950);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .admin-suggestion-block .safety {
+      padding: 10px;
+      color: var(--sea-950);
+      background: var(--rose-50);
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .admin-mini-section {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      padding: 14px;
+      background: var(--green-50);
+      border-radius: 8px;
+    }
+
+    .admin-mini-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .admin-mini-item {
+      padding: 10px;
+      background: #fff;
+      border: 1px solid rgba(63, 138, 107, 0.18);
+      border-radius: 8px;
+    }
+
+    .admin-mini-item strong {
+      display: block;
+      color: var(--sea-950);
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .admin-mini-item span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 1120px) {
+      .operator-grid,
+      .demo-grid,
+      .admin-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .admin-elder-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      #caregiverShell {
+        display: block;
+      }
+
+      #caregiverShell .sidebar {
+        display: none;
+      }
+
+      #caregiverShell .topbar-actions {
+        display: flex;
+        width: 100%;
+      }
+
+      #caregiverShell .topbar-actions .sync-pill,
+      #caregiverShell .topbar-actions #simulatePending {
+        display: none;
+      }
+
+      #caregiverLogoutButton {
+        width: 100%;
+      }
+
+      .mobile-nav {
+        display: none !important;
+      }
+
+      .operator-person {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .operator-avatar {
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+      }
+
+      .operator-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .operator-actions button {
+        min-height: 76px;
+      }
+
+      .admin-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .admin-actions,
+      .admin-actions button {
+        width: 100%;
+      }
+
+      .admin-metric-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .admin-panel {
+        padding: 16px;
+      }
+
+      .admin-elder-row {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1790,6 +2389,15 @@
             <span class="tag success">生活近况</span>
             <span class="tag status">活动照片</span>
             <span class="tag warning">家属评论</span>
+          </span>
+        </button>
+        <button class="login-role" type="button" data-login-role="admin">
+          <strong>管理员登录</strong>
+          <p>查看人生故事书、有效经验库、待确认信息，并触发每日 AI 汇总。</p>
+          <span class="tag-row">
+            <span class="tag success">每日汇总</span>
+            <span class="tag status">经验沉淀</span>
+            <span class="tag warning">人工确认</span>
           </span>
         </button>
       </div>
@@ -1836,6 +2444,7 @@
         <div class="topbar-actions">
           <span class="sync-pill" id="topSync">离线缓存可用 · 09:22</span>
           <button class="ghost-button" type="button" id="simulatePending">模拟弱网</button>
+          <button class="ghost-button" type="button" id="caregiverLogoutButton">退出</button>
         </div>
       </header>
 
@@ -2244,6 +2853,76 @@
           <button class="primary-button" type="submit">发送留言</button>
         </form>
       </section>
+
+      <section class="family-card">
+        <h2>补充一个小故事</h2>
+        <p>写老人熟悉的习惯、称呼、喜欢或害怕的事。</p>
+        <form class="family-story-form" id="familyStoryForm">
+          <textarea id="familyStoryInput" placeholder="例：妈妈吃饭喜欢坐靠窗左侧，不喜欢别人催她第一口。"></textarea>
+          <button class="primary-button" type="submit">补充给系统</button>
+        </form>
+        <div class="feedback-status" id="familyStoryStatus" aria-live="polite"></div>
+      </section>
+
+      <section class="family-card">
+        <h2>需要确认</h2>
+        <p>AI 不确定的信息，需要家属确认后才写入故事书。</p>
+        <div class="comment-list" id="familyConfirmList"></div>
+      </section>
+    </main>
+  </section>
+
+  <section class="admin-shell hidden" id="adminShell" aria-labelledby="adminTitle">
+    <header class="admin-topbar">
+      <div>
+        <span class="admin-eyebrow">CareAction Admin</span>
+        <h1 id="adminTitle">个性化照护建议管理台</h1>
+        <p>把老人认知、家属补充和照护经验，沉淀成下一次任务里的可执行建议。</p>
+      </div>
+      <div class="admin-actions">
+        <button class="primary-button" type="button" id="dailySummaryButton">今日汇总</button>
+        <button class="ghost-button" type="button" id="adminLogoutButton">退出</button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <section class="admin-hero">
+        <div>
+          <h2>今天的建议层状态</h2>
+          <p>护工端只展示行动大卡；这里负责维护背后的故事书、经验库和确认流程。</p>
+        </div>
+        <div class="admin-metric-grid">
+          <article class="admin-metric">
+            <span>故事卡</span>
+            <strong id="adminStoryCount">0</strong>
+          </article>
+          <article class="admin-metric">
+            <span>有效经验</span>
+            <strong id="adminExperienceCount">0</strong>
+          </article>
+          <article class="admin-metric">
+            <span>任务建议</span>
+            <strong id="adminSuggestionCount">0</strong>
+          </article>
+          <article class="admin-metric">
+            <span>待确认</span>
+            <strong id="adminPendingCount">0</strong>
+          </article>
+        </div>
+      </section>
+
+      <div class="feedback-status" id="dailySummaryStatus" aria-live="polite"></div>
+
+      <section class="admin-roster-panel">
+        <div class="admin-panel-head">
+          <div>
+            <h2>老人照护认知总览</h2>
+            <p>一位老人一块信息，管理员可以快速看见建议、故事、经验和待确认事项。</p>
+          </div>
+          <span class="tag success">按老人管理</span>
+        </div>
+        <div class="admin-roster" id="adminElderRoster"></div>
+      </section>
     </main>
   </section>
 
@@ -2252,8 +2931,8 @@
       <h2 id="careCompleteTitle">辛苦了，你做得很好</h2>
       <p id="careCompleteText">老人不配合不是你的错。你已经先安抚、再照护，这很重要。</p>
       <div class="action-buttons">
-        <button class="primary-button" type="button" id="goFeedbackAfterCare">去反馈</button>
-        <button class="ghost-button" type="button" id="closeCareModal">稍后</button>
+        <button class="primary-button" type="button" id="goFeedbackAfterCare">完成，下一件</button>
+        <button class="ghost-button" data-view="feedback" type="button" id="closeCareModal">语音补充</button>
       </div>
     </div>
   </div>
@@ -2488,6 +3167,7 @@
       selectedObservations: ["愿意配合"],
       voiceNote: "",
       uploadedPhotos: [],
+      uploadedPhotoFiles: [],
       completedTaskIds: [],
       familyComments: ["周敏：谢谢陈姐，妈妈看到围巾会安心很多。"],
       familyUpdates: [],
@@ -2496,6 +3176,13 @@
       recognition: null,
       apiOnline: false,
       aiProfiles: {},
+      lifeStoryCards: [],
+      careExperiences: [],
+      taskSuggestions: {},
+      pendingConfirmations: [],
+      familyStoryInputs: [],
+      carePhotos: [],
+      summaryRunning: false,
       profileGenerating: false,
       profileNotice: "",
       weakNetwork: false,
@@ -2507,7 +3194,8 @@
       action: ["照护提示", "听 20 秒，就能做。"],
       why: ["为什么", "看来源。"],
       feedback: ["反馈", "点一下就交。"],
-      evidence: ["老人画像", "偏好、禁忌、最近情况。"]
+      evidence: ["老人画像", "偏好、禁忌、最近情况。"],
+      admin: ["管理演示", "故事书、经验库、待确认。"]
     };
 
     const $ = (selector) => document.querySelector(selector);
@@ -2515,28 +3203,38 @@
     const API_BASES = [
       window.CAREACTION_API_BASE,
       (location.protocol === "http:" || location.protocol === "https:") ? location.origin : "",
-      "http://192.168.31.142:3000",
-      "http://127.0.0.1:3000"
-    ].filter(Boolean);
+      "http://127.0.0.1:3000",
+      "http://localhost:3000",
+      "http://192.168.31.142:3000"
+    ].filter(Boolean).filter((item, index, list) => list.indexOf(item) === index);
     let activeApiBase = API_BASES[0] || "";
 
     async function apiRequest(path, options = {}) {
       let lastError = null;
-      for (const apiBase of API_BASES) {
+      const { timeoutMs = 3200, ...fetchOptions } = options;
+      const candidates = [activeApiBase, ...API_BASES]
+        .filter(Boolean)
+        .filter((item, index, list) => list.indexOf(item) === index);
+      for (const apiBase of candidates) {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
         try {
           const response = await fetch(`${apiBase}${path}`, {
-            ...options,
+            ...fetchOptions,
+            signal: controller.signal,
             headers: {
               "Content-Type": "application/json",
-              ...(options.headers || {})
+              ...(fetchOptions.headers || {})
             }
           });
+          window.clearTimeout(timeoutId);
           if (!response.ok) {
             throw new Error(`API ${response.status}`);
           }
           activeApiBase = apiBase;
           return response.json();
         } catch (error) {
+          window.clearTimeout(timeoutId);
           lastError = error;
         }
       }
@@ -2550,6 +3248,12 @@
           elders = data.elders;
           tasks = data.tasks;
           state.aiProfiles = data.ai_profiles || {};
+          state.lifeStoryCards = data.life_story_cards || [];
+          state.careExperiences = data.care_experiences || [];
+          state.taskSuggestions = data.task_suggestions || {};
+          state.pendingConfirmations = data.pending_confirmations || [];
+          state.familyStoryInputs = data.family_story_inputs || [];
+          state.carePhotos = data.care_photos || [];
           if (!tasks.some((task) => task.id === state.selectedTaskId)) {
             state.selectedTaskId = tasks[0]?.id || state.selectedTaskId;
           }
@@ -2571,6 +3275,21 @@
 
     function currentElder() {
       return elders[currentTask().elderId];
+    }
+
+    function currentSuggestion() {
+      const task = currentTask();
+      return state.taskSuggestions[task.id] || {
+        task_id: task.id,
+        elder_id: task.elderId,
+        headline: task.actionTitle,
+        action: task.mainAction,
+        script: task.script,
+        safety: task.safetyText,
+        source_summary: task.confidenceNote,
+        confidence: task.confidence,
+        evidence: task.evidence
+      };
     }
 
     function tagClass(value) {
@@ -2604,60 +3323,187 @@
       const list = $("#taskList");
       const task = currentTask();
       const elder = elders[task.elderId];
+      const suggestion = currentSuggestion();
       const currentIndex = Math.max(0, tasks.findIndex((item) => item.id === task.id));
       const nextTask = tasks[currentIndex + 1];
+      const steps = (task.steps || []).slice(0, 3);
       list.innerHTML = `
-        <div class="current-task-focus">
-          <div class="progress-line">
-            <span>${task.time} · ${elder.room}房</span>
-            <span>${currentIndex + 1}/${tasks.length}</span>
+        <article class="operator-card" aria-label="当前照护任务">
+          <div class="operator-topline">
+            <span>现在要做</span>
+            <span>${task.time} · ${currentIndex + 1}/${tasks.length}</span>
           </div>
-          <h3>${elder.name} · ${task.title}</h3>
-          <p>${task.actionTitle}</p>
+          <div class="operator-person">
+            <div class="operator-avatar">${elder.initial}</div>
+            <div>
+              <h2>${elder.name}</h2>
+              <p>${elder.room}房 · ${task.title}</p>
+            </div>
+          </div>
+          <div class="operator-action">
+            <span>这样做</span>
+            <strong>${suggestion.action || task.mainAction}</strong>
+          </div>
+          <div class="operator-grid">
+            <div class="operator-mini-card">
+              <h3>照着说</h3>
+              <p>${suggestion.script || task.script}</p>
+            </div>
+            <div class="operator-mini-card">
+              <h3>只记 3 步</h3>
+              <ol>${steps.map((step) => `<li>${step}</li>`).join("")}</ol>
+            </div>
+          </div>
+          <div class="operator-safety ${task.safetyLevel === "high" ? "high" : ""}">
+            <span>!</span>
+            <strong>${suggestion.safety || task.safetyText}</strong>
+          </div>
           <div class="warm-note">${task.reminder}</div>
-          <span class="tag-row">
+          <div class="tag-row">
             ${task.risks.map((risk) => `<span class="tag ${tagClass(risk)}">${risk}</span>`).join("")}
-          </span>
-          <div class="action-buttons">
-            <button class="primary-button" data-view="action" data-autoplay="voice" type="button">听语音，开始</button>
-            <button class="secondary-button" type="button" id="completeCurrentFocus">完成反馈</button>
           </div>
-          <p>${nextTask ? `下一件：${nextTask.time} · ${elders[nextTask.elderId].name} · ${nextTask.title}` : "今天任务已到最后一件。"}</p>
-        </div>
+          <div class="operator-actions">
+            <button class="primary-button" type="button" id="operatorPlayVoice">播放语音</button>
+            <button class="secondary-button" type="button" id="operatorComplete">完成</button>
+            <button class="ghost-button" type="button" id="operatorHelp">需要帮助</button>
+          </div>
+          <div class="operator-footer-line">
+            <span>${suggestion.source_summary || task.confidenceNote}</span>
+            <span class="operator-next">${nextTask ? `下一件：${nextTask.time} · ${elders[nextTask.elderId].name}` : "今天任务已到最后一件"}</span>
+          </div>
+        </article>
       `;
-      $("#completeCurrentFocus").addEventListener("click", showCareCompleteModal);
-      list.querySelector("[data-view='action']").addEventListener("click", () => {
+      $("#operatorComplete").addEventListener("click", showCareCompleteModal);
+      $("#operatorPlayVoice").addEventListener("click", () => {
         speakActionSummary();
-        switchView("action");
+      });
+      $("#operatorHelp").addEventListener("click", requestHelpForCurrentTask);
+    }
+
+    function renderAdminPanel() {
+      const roster = $("#adminElderRoster");
+      if (!roster) return;
+      const activePending = (state.pendingConfirmations || []).filter((item) => item.status === "pending");
+      const suggestions = Object.values(state.taskSuggestions || {});
+      if ($("#adminStoryCount")) $("#adminStoryCount").textContent = state.lifeStoryCards.length;
+      if ($("#adminExperienceCount")) $("#adminExperienceCount").textContent = state.careExperiences.length;
+      if ($("#adminSuggestionCount")) $("#adminSuggestionCount").textContent = suggestions.length || tasks.length;
+      if ($("#adminPendingCount")) $("#adminPendingCount").textContent = activePending.length;
+
+      const elderList = Object.values(elders).sort((a, b) => String(a.room).localeCompare(String(b.room), "zh-CN"));
+      roster.innerHTML = elderList.map((elder) => {
+        const elderTasks = tasks.filter((task) => task.elderId === elder.id);
+        const task = elderTasks.find((item) => item.status !== "已完成") || elderTasks[0] || currentTask();
+        const suggestion = state.taskSuggestions[task.id] || {
+          headline: task.actionTitle,
+          action: task.mainAction,
+          script: task.script,
+          safety: task.safetyText,
+          source_summary: task.confidenceNote,
+          confidence: task.confidence
+        };
+        const storyCards = (state.lifeStoryCards || []).filter((item) => item.elder_id === elder.id).slice(0, 2);
+        const experiences = (state.careExperiences || []).filter((item) => item.elder_id === elder.id).slice(0, 2);
+        const pending = activePending.filter((item) => item.elder_id === elder.id).slice(0, 2);
+        const storyHtml = storyCards.map((item) => `
+          <div class="admin-mini-item">
+            <strong>${item.title}</strong>
+            <span>${item.care_meaning || item.content}</span>
+          </div>
+        `).join("") || `<div class="admin-mini-item"><strong>暂无故事卡</strong><span>点击今日汇总后生成。</span></div>`;
+        const expHtml = experiences.map((item) => `
+          <div class="admin-mini-item">
+            <strong>${item.task_type}</strong>
+            <span>${item.method}</span>
+          </div>
+        `).join("") || `<div class="admin-mini-item"><strong>暂无经验</strong><span>等待汇总或管理员整理。</span></div>`;
+        const pendingHtml = pending.map((item) => `
+          <div class="admin-mini-item">
+            <strong>${item.title}</strong>
+            <span>${item.suggested_value || item.content}</span>
+          </div>
+        `).join("") || `<div class="admin-mini-item"><strong>无待确认</strong><span>当前没有低置信信息。</span></div>`;
+        return `
+          <article class="admin-elder-row">
+            <div class="admin-elder-profile">
+              <div class="admin-elder-avatar">${elder.initial}</div>
+              <div>
+                <h3>${elder.name}</h3>
+                <p>${elder.room}房 · ${elder.age}岁</p>
+                <p>${elder.status}</p>
+                <div class="tag-row" style="margin-top: 10px;">
+                  ${(elder.preferenceTags || []).slice(0, 3).map((tag) => `<span class="tag success">${tag}</span>`).join("")}
+                </div>
+              </div>
+            </div>
+            <div class="admin-suggestion-block">
+              <span class="tag success">${task.time} · ${task.title}</span>
+              <h3>${suggestion.headline || task.actionTitle}</h3>
+              <p>${suggestion.action || task.mainAction}</p>
+              <div class="script">${suggestion.script || task.script}</div>
+              <div class="safety">${suggestion.safety || task.safetyText}</div>
+            </div>
+            <div class="admin-mini-section">
+              <h3>故事书</h3>
+              <div class="admin-mini-list">${storyHtml}</div>
+            </div>
+            <div class="admin-mini-section">
+              <h3>经验 / 确认</h3>
+              <div class="admin-mini-list">${expHtml}${pendingHtml}</div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderFamilyConfirmations() {
+      const target = $("#familyConfirmList");
+      if (!target) return;
+      const pending = (state.pendingConfirmations || []).filter((item) => item.status === "pending");
+      target.innerHTML = pending.slice(0, 5).map((item) => `
+        <div class="comment-item" data-confirmation-id="${item.id}">
+          <strong>${item.title}</strong>
+          <p>${item.suggested_value || item.content}</p>
+          <div class="family-confirm-actions">
+            <button class="secondary-button compact-button" type="button" data-confirm-action="confirm" data-id="${item.id}">确认</button>
+            <button class="ghost-button compact-button" type="button" data-confirm-action="edit" data-id="${item.id}">修改</button>
+            <button class="danger-button compact-button" type="button" data-confirm-action="deny" data-id="${item.id}">否认</button>
+          </div>
+        </div>
+      `).join("") || `<div class="comment-item">目前没有需要确认的信息。</div>`;
+      target.querySelectorAll("[data-confirm-action]").forEach((button) => {
+        button.addEventListener("click", () => resolveFamilyConfirmation(button.dataset.id, button.dataset.confirmAction));
       });
     }
 
     function renderActionPreview() {
       const task = currentTask();
       const elder = currentElder();
+      const suggestion = currentSuggestion();
       $("#todayAvatar").textContent = elder.initial;
       $("#todayElderLine").textContent = `${elder.name} · ${elder.age}岁 · ${elder.status}`;
-      $("#todayConfidenceLabel").textContent = `可信度 ${task.confidence}%`;
-      $("#todayMeter").style.width = `${task.confidence}%`;
-      $("#todayActionTitle").textContent = task.actionTitle;
+      $("#todayConfidenceLabel").textContent = `可信度 ${suggestion.confidence || task.confidence}%`;
+      $("#todayMeter").style.width = `${suggestion.confidence || task.confidence}%`;
+      $("#todayActionTitle").textContent = suggestion.headline || task.actionTitle;
       $("#todayActionSubtitle").textContent = task.context;
-      $("#todayScript").textContent = task.script;
+      $("#todayScript").textContent = suggestion.script || task.script;
       $("#todaySafety").classList.toggle("high", task.safetyLevel === "high");
       $("#todaySafetyTitle").textContent = task.safetyTitle;
-      $("#todaySafetyText").textContent = task.safetyText;
+      $("#todaySafetyText").textContent = suggestion.safety || task.safetyText;
     }
 
     function buildVoiceSummary(task, elder) {
+      const suggestion = currentSuggestion();
       const shorten = (text, max) => text
         .replace(/[“”]/g, "")
         .replace(/[。；;]/g, "，")
         .slice(0, max)
         .replace(/[，、\s]+$/g, "");
-      const firstStep = shorten(task.steps[0] || task.mainAction, 34);
-      const script = shorten(task.script, 38);
+      const firstStep = shorten(suggestion.action || task.steps[0] || task.mainAction, 42);
+      const script = shorten(suggestion.script || task.script, 42);
       const safety = task.safetyLevel === "high"
         ? "要人工确认。"
-        : "异常就停。";
+        : shorten(suggestion.safety || "异常就停。", 24);
       return `${elder.name}，${task.title}。先做：${firstStep}。照着说：${script}。${safety}`;
     }
 
@@ -2678,6 +3524,18 @@
       }
       state.actionVoicePlaying = false;
       renderActionVoice();
+    }
+
+    function stopLiveInteractions() {
+      stopActionVoice();
+      if (state.recognition) {
+        try {
+          state.recognition.abort();
+        } catch (error) {
+          console.warn("语音识别停止失败。", error);
+        }
+        state.recognition = null;
+      }
     }
 
     function speakActionSummary() {
@@ -2762,16 +3620,17 @@
     function renderActionCard() {
       const task = currentTask();
       const elder = currentElder();
+      const suggestion = currentSuggestion();
       $("#actionAvatar").textContent = elder.initial;
       $("#actionElderLine").textContent = `${elder.name} · ${elder.age}岁 · ${elder.room}房`;
-      $("#actionConfidenceLabel").textContent = `可信度 ${task.confidence}%`;
-      $("#actionMeter").style.width = `${task.confidence}%`;
-      $("#actionHeading").textContent = task.actionTitle;
+      $("#actionConfidenceLabel").textContent = `可信度 ${suggestion.confidence || task.confidence}%`;
+      $("#actionMeter").style.width = `${suggestion.confidence || task.confidence}%`;
+      $("#actionHeading").textContent = suggestion.headline || task.actionTitle;
       $("#actionContext").textContent = `${task.time} · ${task.title} · ${task.status}`;
       $("#voiceSummary").textContent = buildVoiceSummary(task, elder);
-      $("#mainAction").textContent = task.mainAction;
+      $("#mainAction").textContent = suggestion.action || task.mainAction;
       $("#stepList").innerHTML = task.steps.map((step) => `<li>${step}</li>`).join("");
-      $("#scriptBox").textContent = task.script;
+      $("#scriptBox").textContent = suggestion.script || task.script;
       $("#expectedResult").textContent = task.expected;
       $("#learningCue").textContent = task.learningCue;
       $("#careReminder").textContent = task.reminder;
@@ -2781,7 +3640,7 @@
       renderTags(task.risks, $("#actionRiskTags"));
       $("#actionSafety").classList.toggle("high", task.safetyLevel === "high");
       $("#actionSafetyTitle").textContent = task.safetyTitle;
-      $("#actionSafetyText").textContent = task.safetyText;
+      $("#actionSafetyText").textContent = suggestion.safety || task.safetyText;
       renderActionVoice();
     }
 
@@ -2868,7 +3727,8 @@
       try {
         const result = await apiRequest("/api/ai/profile/generate", {
           method: "POST",
-          body: JSON.stringify({ elder_id: elder.id })
+          body: JSON.stringify({ elder_id: elder.id }),
+          timeoutMs: 70000
         });
         state.aiProfiles[elder.id] = result.profile;
         state.apiOnline = true;
@@ -2928,17 +3788,223 @@
         "https://images.unsplash.com/photo-1583947582886-f40ec95dd752?auto=format&fit=crop&w=600&q=80",
         "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=600&q=80"
       ];
-      const photos = latestUpdate?.photos?.length ? latestUpdate.photos : defaultPhotos;
+      const backendPhotos = (state.carePhotos || [])
+        .filter((photo) => photo.elder_id === elder.id && photo.visible_to_family)
+        .map((photo) => photo.image_data);
+      const photos = backendPhotos.length ? backendPhotos : (latestUpdate?.photos?.length ? latestUpdate.photos : defaultPhotos);
       $("#familyPhotoGrid").innerHTML = photos.map((src, index) => `<img alt="老人今日活动照片 ${index + 1}" src="${src}" />`).join("");
       $("#familyCommentList").innerHTML = state.familyComments
         .map((item) => `<div class="comment-item">${item}</div>`)
         .join("");
+      renderFamilyConfirmations();
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadSelectedPhotos(task, elder, caption) {
+      if (!state.uploadedPhotoFiles.length) return;
+      const photos = await Promise.all(state.uploadedPhotoFiles.map(fileToDataUrl));
+      await apiRequest("/api/photos", {
+        method: "POST",
+        body: JSON.stringify({
+          task_id: task.id,
+          elder_id: elder.id,
+          photos,
+          caption
+        })
+      });
+      state.carePhotos = [
+        ...photos.map((imageData, index) => ({
+          id: `local-${Date.now()}-${index}`,
+          task_id: task.id,
+          elder_id: elder.id,
+          image_data: imageData,
+          caption,
+          visible_to_family: true,
+          created_at: new Date().toISOString()
+        })),
+        ...state.carePhotos
+      ];
+    }
+
+    function completeCurrentTask() {
+      const task = currentTask();
+      const elder = currentElder();
+      const completedTask = tasks.find((item) => item.id === task.id);
+      if (completedTask) completedTask.status = "已完成";
+      state.familyUpdates = [
+        {
+          time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
+          taskTitle: task.title,
+          effect: "已完成",
+          reaction: `${elder.name}${task.title}已完成。`,
+          photos: []
+        },
+        ...state.familyUpdates
+      ].slice(0, 6);
+      advanceToNextTask();
+      closeCareCompleteModal();
+      updateSyncUI();
+      renderAll();
+      switchView("today");
+
+      apiRequest(`/api/tasks/${encodeURIComponent(task.id)}/complete`, {
+        method: "POST",
+        body: JSON.stringify({ effect: "已完成", observations: ["完成"] })
+      }).then(() => {
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        updateSyncUI();
+      }).catch((error) => {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        updateSyncUI();
+        console.warn("完成状态未写入数据库，已保留本地状态。", error);
+      });
+    }
+
+    function requestHelpForCurrentTask() {
+      const task = currentTask();
+      const status = $("#feedbackStatus");
+      alert("已记录：需要帮助。请立即按机构流程联系护士或管理员。");
+      if (status) status.textContent = "";
+      apiRequest(`/api/tasks/${encodeURIComponent(task.id)}/help`, {
+        method: "POST",
+        body: JSON.stringify({ note: "护工在当前任务点击了需要帮助。" })
+      }).then(() => {
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        updateSyncUI();
+      }).catch((error) => {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        updateSyncUI();
+        console.warn("求助未写入数据库。", error);
+      });
+    }
+
+    async function runDailySummary() {
+      const button = $("#dailySummaryButton");
+      const status = $("#dailySummaryStatus");
+      state.summaryRunning = true;
+      button.disabled = true;
+      button.textContent = "汇总中";
+      status.className = "feedback-status show pending";
+      status.textContent = "正在整理人生故事书、经验库和任务建议。";
+      try {
+        const result = await apiRequest("/api/daily-summary", {
+          method: "POST",
+          body: JSON.stringify({}),
+          timeoutMs: 95000
+        });
+        if (result.summary) {
+          state.lifeStoryCards = [...(result.summary.story_cards || []), ...state.lifeStoryCards];
+          state.careExperiences = [...(result.summary.care_experiences || []), ...state.careExperiences];
+          state.pendingConfirmations = [...(result.summary.pending_confirmations || []), ...state.pendingConfirmations];
+          const suggestions = {};
+          (result.summary.task_suggestions || []).forEach((item) => {
+            suggestions[item.task_id] = item;
+          });
+          state.taskSuggestions = { ...state.taskSuggestions, ...suggestions };
+        }
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        status.className = "feedback-status show success";
+        status.textContent = result.warning || "今日汇总已完成，任务建议已更新。";
+      } catch (error) {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        status.className = "feedback-status show pending";
+        status.textContent = "后端未连接，暂时无法汇总。";
+        console.warn("每日汇总失败。", error);
+      } finally {
+        state.summaryRunning = false;
+        button.disabled = false;
+        button.textContent = "今日汇总";
+        updateSyncUI();
+        renderAll();
+      }
+    }
+
+    async function submitFamilyStory() {
+      const input = $("#familyStoryInput");
+      const status = $("#familyStoryStatus");
+      const content = input.value.trim();
+      if (!content) return;
+      const elder = elders.zhou || currentElder();
+      try {
+        const result = await apiRequest("/api/family/story-input", {
+          method: "POST",
+          body: JSON.stringify({ elder_id: elder.id, author: "周敏", content })
+        });
+        state.familyStoryInputs = [result.story_input, ...state.familyStoryInputs];
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        status.className = "feedback-status show success";
+        status.textContent = "已提交，下一次每日汇总会整理。";
+      } catch (error) {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        status.className = "feedback-status show pending";
+        status.textContent = "已先保存在本机，后端连接后再同步。";
+        console.warn("家属故事未写入数据库。", error);
+      }
+      state.familyComments = [`周敏补充：${content}`, ...state.familyComments].slice(0, 6);
+      input.value = "";
+      updateSyncUI();
+      renderFamilyPortal();
+    }
+
+    async function resolveFamilyConfirmation(id, action) {
+      const item = state.pendingConfirmations.find((entry) => String(entry.id) === String(id));
+      if (!item) return;
+      const value = action === "edit"
+        ? prompt("请修改后确认：", item.suggested_value || item.content)
+        : item.suggested_value;
+      if (action === "edit" && !value) return;
+      try {
+        await apiRequest(`/api/confirmations/${encodeURIComponent(id)}/resolve`, {
+          method: "POST",
+          body: JSON.stringify({ action, value })
+        });
+        item.status = action === "deny" ? "denied" : (action === "edit" ? "edited" : "confirmed");
+        if (action !== "deny") {
+          state.lifeStoryCards = [
+            {
+              id: `confirmed-${id}`,
+              elder_id: item.elder_id,
+              section: "家属确认",
+              title: item.title,
+              content: value,
+              care_meaning: "后续任务建议可引用这条已确认信息。",
+              confidence: "高",
+              status: "active",
+              evidence: []
+            },
+            ...state.lifeStoryCards
+          ];
+        }
+      } catch (error) {
+        console.warn("确认结果未写入数据库。", error);
+        item.status = action === "deny" ? "denied" : "confirmed";
+      }
+      renderFamilyPortal();
+      renderAdminPanel();
     }
 
     function showLogin() {
+      stopLiveInteractions();
       $("#loginScreen").classList.remove("hidden");
       $("#caregiverShell").classList.add("hidden");
       $("#familyShell").classList.add("hidden");
+      $("#adminShell").classList.add("hidden");
       $("#mobileNav").classList.add("hidden");
     }
 
@@ -2948,16 +4014,25 @@
       if (role === "family") {
         $("#caregiverShell").classList.add("hidden");
         $("#familyShell").classList.remove("hidden");
+        $("#adminShell").classList.add("hidden");
         $("#mobileNav").classList.add("hidden");
         renderFamilyPortal();
         return;
       }
+      if (role === "admin") {
+        $("#caregiverShell").classList.add("hidden");
+        $("#familyShell").classList.add("hidden");
+        $("#adminShell").classList.remove("hidden");
+        $("#mobileNav").classList.add("hidden");
+        renderAdminPanel();
+        return;
+      }
       $("#caregiverShell").classList.remove("hidden");
       $("#familyShell").classList.add("hidden");
+      $("#adminShell").classList.add("hidden");
       $("#mobileNav").classList.remove("hidden");
       renderAll();
       switchView("today");
-      speakActionSummary();
     }
 
     function showCareCompleteModal() {
@@ -2971,9 +4046,7 @@
     }
 
     function goToFeedbackAfterCare() {
-      closeCareCompleteModal();
-      switchView("feedback");
-      renderFeedback();
+      completeCurrentTask();
     }
 
     function advanceToNextTask() {
@@ -2989,6 +4062,7 @@
         state.selectedObservations = ["愿意配合"];
         state.voiceNote = "";
         state.uploadedPhotos = [];
+        state.uploadedPhotoFiles = [];
         $("#quickNote").value = "";
         $("#photoUpload").value = "";
         $("#photoPreview").innerHTML = "";
@@ -2999,7 +4073,8 @@
       state.uploadedPhotos.forEach((url) => {
         if (url.startsWith("blob:")) URL.revokeObjectURL(url);
       });
-      state.uploadedPhotos = Array.from(files || []).slice(0, 3).map((file) => URL.createObjectURL(file));
+      state.uploadedPhotoFiles = Array.from(files || []).slice(0, 3);
+      state.uploadedPhotos = state.uploadedPhotoFiles.map((file) => URL.createObjectURL(file));
       $("#photoPreview").innerHTML = state.uploadedPhotos
         .map((src, index) => `<img alt="反馈照片 ${index + 1}" src="${src}" />`)
         .join("");
@@ -3008,12 +4083,17 @@
     function renderAll() {
       renderStats();
       renderTaskList();
-      renderActionPreview();
       renderActionCard();
-      renderWhy();
-      renderFeedback();
-      renderProfile();
-      renderFamilyPortal();
+      if (state.loggedInRole === "caregiver") {
+        renderActionPreview();
+        renderWhy();
+        renderFeedback();
+        renderProfile();
+      } else if (state.loggedInRole === "family") {
+        renderFamilyPortal();
+      } else if (state.loggedInRole === "admin") {
+        renderAdminPanel();
+      }
     }
 
     function switchView(viewName) {
@@ -3081,11 +4161,17 @@
       generateAiProfile();
     });
 
+    $("#dailySummaryButton").addEventListener("click", () => {
+      runDailySummary();
+    });
+
     $$("[data-login-role]").forEach((button) => {
       button.addEventListener("click", () => loginAs(button.dataset.loginRole));
     });
 
     $("#familyLogoutButton").addEventListener("click", showLogin);
+    $("#adminLogoutButton").addEventListener("click", showLogin);
+    $("#caregiverLogoutButton").addEventListener("click", showLogin);
 
     $("#completeTaskButton").addEventListener("click", showCareCompleteModal);
     $("#completeFromToday").addEventListener("click", showCareCompleteModal);
@@ -3103,6 +4189,11 @@
       state.familyComments = [`周敏：${value}`, ...state.familyComments].slice(0, 6);
       $("#familyCommentInput").value = "";
       renderFamilyPortal();
+    });
+
+    $("#familyStoryForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      submitFamilyStory();
     });
 
     $("#simulatePending").addEventListener("click", () => {
@@ -3134,28 +4225,6 @@
       let feedbackTime = time;
       let tagText = "已记录";
       let tagClassName = "success";
-
-      apiRequest("/api/feedback", {
-        method: "POST",
-        body: JSON.stringify({
-          task_id: task.id,
-          elder_id: elder.id,
-          effect: state.selectedEffect,
-          observations: state.selectedObservations,
-          voice_note: state.voiceNote,
-          note
-        })
-      }).then((result) => {
-        state.apiOnline = true;
-        state.weakNetwork = false;
-        if (result.feedback?.time) feedbackTime = result.feedback.time;
-        updateSyncUI();
-      }).catch((error) => {
-        state.apiOnline = false;
-        state.weakNetwork = true;
-        updateSyncUI();
-        console.warn("反馈未写入数据库，已保留本地状态。", error);
-      });
 
       const message = "已记录，继续下一件。";
 
@@ -3192,6 +4261,30 @@
       advanceToNextTask();
       renderAll();
       switchView("today");
+
+      apiRequest("/api/feedback", {
+        method: "POST",
+        body: JSON.stringify({
+          task_id: task.id,
+          elder_id: elder.id,
+          effect: state.selectedEffect,
+          observations: state.selectedObservations,
+          voice_note: state.voiceNote,
+          note
+        })
+      }).then((result) => {
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        if (result.feedback?.time) feedbackTime = result.feedback.time;
+        return uploadSelectedPhotos(task, elder, reaction);
+      }).then(() => {
+        updateSyncUI();
+      }).catch((error) => {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        updateSyncUI();
+        console.warn("反馈未写入数据库，已保留本地状态。", error);
+      });
     });
 
     renderAll();

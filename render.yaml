@@ -22,3 +22,7 @@ services:
         sync: false
       - key: EXTERNAL_API_TOKEN
         sync: false
+      - key: EXTERNAL_POSTGRES_URL
+        sync: false
+      - key: EXTERNAL_POSTGRES_QUERY
+        sync: false

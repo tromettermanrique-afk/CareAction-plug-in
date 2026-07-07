@@ -7,7 +7,13 @@ import os
 from pathlib import Path
 import sqlite3
 
-from integrations import fetch_external_records, generate_care_profile, integration_status, load_env
+from integrations import (
+    fetch_external_records,
+    generate_care_profile,
+    generate_daily_summary,
+    integration_status,
+    load_env,
+)
 
 try:
     import psycopg
@@ -23,6 +29,16 @@ load_env()
 DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
 USE_POSTGRES = bool(DATABASE_URL)
 PORT = int(os.environ.get("PORT") or os.environ.get("CAREACTION_PORT", "3000"))
+INSERT_ID_TABLES = {
+    "FEEDBACK",
+    "AI_PROFILES",
+    "LIFE_STORY_CARDS",
+    "CARE_EXPERIENCES",
+    "TASK_SUGGESTIONS",
+    "PENDING_CONFIRMATIONS",
+    "FAMILY_STORY_INPUTS",
+    "CARE_PHOTOS",
+}
 
 
 SEED_ELDERS = [
@@ -274,7 +290,8 @@ class DatabaseAdapter:
             return self.raw.execute(query, params)
 
         clean = query.strip().rstrip(";")
-        needs_id = clean.upper().startswith("INSERT INTO FEEDBACK") or clean.upper().startswith("INSERT INTO AI_PROFILES")
+        upper = clean.upper()
+        needs_id = any(upper.startswith(f"INSERT INTO {table}") for table in INSERT_ID_TABLES)
         if needs_id and "RETURNING" not in clean.upper():
             clean = f"{clean} RETURNING id"
         cursor = self.raw.execute(self._query(clean), params)
@@ -413,11 +430,94 @@ def init_db():
               created_at TEXT NOT NULL,
               FOREIGN KEY (elder_id) REFERENCES elders(id)
             );
+
+            CREATE TABLE IF NOT EXISTS life_story_cards (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              elder_id TEXT NOT NULL,
+              section TEXT NOT NULL,
+              title TEXT NOT NULL,
+              content TEXT NOT NULL,
+              care_meaning TEXT NOT NULL,
+              confidence TEXT NOT NULL,
+              status TEXT NOT NULL,
+              evidence TEXT NOT NULL,
+              generated_by TEXT NOT NULL,
+              created_at TEXT NOT NULL,
+              FOREIGN KEY (elder_id) REFERENCES elders(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS care_experiences (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              elder_id TEXT NOT NULL,
+              task_type TEXT NOT NULL,
+              method TEXT NOT NULL,
+              why_it_works TEXT NOT NULL,
+              source TEXT NOT NULL,
+              confidence TEXT NOT NULL,
+              safety TEXT NOT NULL,
+              status TEXT NOT NULL,
+              created_at TEXT NOT NULL,
+              FOREIGN KEY (elder_id) REFERENCES elders(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS task_suggestions (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              task_id TEXT NOT NULL,
+              elder_id TEXT NOT NULL,
+              headline TEXT NOT NULL,
+              action TEXT NOT NULL,
+              script TEXT NOT NULL,
+              safety TEXT NOT NULL,
+              source_summary TEXT NOT NULL,
+              confidence INTEGER NOT NULL,
+              evidence TEXT NOT NULL,
+              generated_at TEXT NOT NULL,
+              FOREIGN KEY (task_id) REFERENCES tasks(id),
+              FOREIGN KEY (elder_id) REFERENCES elders(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS pending_confirmations (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              elder_id TEXT NOT NULL,
+              title TEXT NOT NULL,
+              content TEXT NOT NULL,
+              suggested_value TEXT NOT NULL,
+              source TEXT NOT NULL,
+              confidence TEXT NOT NULL,
+              status TEXT NOT NULL,
+              resolution TEXT NOT NULL DEFAULT '',
+              created_at TEXT NOT NULL,
+              resolved_at TEXT NOT NULL DEFAULT '',
+              FOREIGN KEY (elder_id) REFERENCES elders(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS family_story_inputs (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              elder_id TEXT NOT NULL,
+              author TEXT NOT NULL,
+              content TEXT NOT NULL,
+              created_at TEXT NOT NULL,
+              status TEXT NOT NULL,
+              FOREIGN KEY (elder_id) REFERENCES elders(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS care_photos (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              elder_id TEXT NOT NULL,
+              task_id TEXT NOT NULL,
+              image_data TEXT NOT NULL,
+              caption TEXT NOT NULL,
+              created_at TEXT NOT NULL,
+              visible_to_family INTEGER NOT NULL DEFAULT 1,
+              FOREIGN KEY (elder_id) REFERENCES elders(id),
+              FOREIGN KEY (task_id) REFERENCES tasks(id)
+            );
             """
         )
         count = conn.execute("SELECT COUNT(*) FROM elders").fetchone()[0]
         if count == 0:
             seed(conn)
+        seed_personalization_layer(conn)
 
 
 def seed(conn):
@@ -498,6 +598,132 @@ def seed(conn):
                 """,
                 (task["id"], item["type"], item["source"], item["time"], item["confidence"], item["text"]),
             )
+
+
+def seed_personalization_layer(conn):
+    if conn.execute("SELECT COUNT(*) FROM care_experiences").fetchone()[0] == 0:
+        now = dt.datetime.now().isoformat(timespec="seconds")
+        seed_items = [
+            {
+                "elder_id": "zhou",
+                "task_type": "洗漱",
+                "method": "先找红围巾，再开始洗漱。",
+                "why_it_works": "红围巾和女儿线索能降低焦虑。",
+                "source": "家属 + 早班经验",
+                "confidence": "高",
+                "safety": "只做沟通安抚，异常按机构流程。",
+            },
+            {
+                "elder_id": "liu",
+                "task_type": "吃饭",
+                "method": "叫“刘老师”，确认粥温热，再小口慢吃。",
+                "why_it_works": "尊称和沪剧能提升配合度。",
+                "source": "家属 + 王宁经验",
+                "confidence": "中高",
+                "safety": "吞咽异常马上停下并通知护士。",
+            },
+            {
+                "elder_id": "chen",
+                "task_type": "转移",
+                "method": "先说明每一步，确认地面和助行器，再慢慢扶起。",
+                "why_it_works": "先说明能减少突然被扶的不安。",
+                "source": "午班经验 + 护士确认",
+                "confidence": "中",
+                "safety": "跌倒高风险，需人工确认并遵循机构流程。",
+            },
+        ]
+        for item in seed_items:
+            conn.execute(
+                """
+                INSERT INTO care_experiences (
+                  elder_id, task_type, method, why_it_works, source, confidence, safety, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    item["elder_id"],
+                    item["task_type"],
+                    item["method"],
+                    item["why_it_works"],
+                    item["source"],
+                    item["confidence"],
+                    item["safety"],
+                    "active",
+                    now,
+                ),
+            )
+
+    if conn.execute("SELECT COUNT(*) FROM life_story_cards").fetchone()[0] == 0:
+        now = dt.datetime.now().isoformat(timespec="seconds")
+        seed_cards = [
+            {
+                "elder_id": "zhou",
+                "section": "重要关系",
+                "title": "女儿和红围巾是安心线索",
+                "content": "周雅琴阿姨想起女儿时情绪更稳定，红围巾能帮助她确认熟悉感。",
+                "care_meaning": "洗漱前先让她看到红围巾，再提一句女儿会来。",
+                "confidence": "高",
+                "evidence": [{"source": "女儿", "time": "07-02", "text": "红围巾能安抚。", "confidence": "高"}],
+            },
+            {
+                "elder_id": "liu",
+                "section": "尊严称呼",
+                "title": "他更愿意被叫刘老师",
+                "content": "刘建国伯伯对“刘老师”的称呼反应更好，吃饭时更愿意配合。",
+                "care_meaning": "陪餐开头先叫刘老师，语速放慢。",
+                "confidence": "高",
+                "evidence": [{"source": "儿子", "time": "07-04", "text": "叫刘老师更配合。", "confidence": "高"}],
+            },
+            {
+                "elder_id": "chen",
+                "section": "安全边界",
+                "title": "转移前要先说明和确认",
+                "content": "陈淑芬奶奶不喜欢突然被扶，夜间起身多，转移前需要先说明并确认安全。",
+                "care_meaning": "如厕转移必须先人工确认，再按流程慢慢扶。",
+                "confidence": "中",
+                "evidence": [{"source": "午班", "time": "昨天", "text": "先说明，再起身，有用。", "confidence": "中高"}],
+            },
+        ]
+        for card in seed_cards:
+            conn.execute(
+                """
+                INSERT INTO life_story_cards (
+                  elder_id, section, title, content, care_meaning, confidence, status,
+                  evidence, generated_by, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    card["elder_id"],
+                    card["section"],
+                    card["title"],
+                    card["content"],
+                    card["care_meaning"],
+                    card["confidence"],
+                    "active",
+                    encode(card["evidence"]),
+                    "seed",
+                    now,
+                ),
+            )
+
+    if conn.execute("SELECT COUNT(*) FROM pending_confirmations").fetchone()[0] == 0:
+        now = dt.datetime.now().isoformat(timespec="seconds")
+        conn.execute(
+            """
+            INSERT INTO pending_confirmations (
+              elder_id, title, content, suggested_value, source, confidence, status, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "zhou",
+                "确认午后活动偏好",
+                "系统多次看到“午后听沪剧”有效，但还需要家属确认是否每天都适用。",
+                "午后活动前可先问要不要听沪剧。",
+                "家属语音 + 早班反馈",
+                "低",
+                "pending",
+                now,
+            ),
+        )
 
 
 def elder_from_row(row, observations):
@@ -669,6 +895,225 @@ def latest_ai_profile_map(conn):
     return result
 
 
+def get_life_story_cards(conn, elder_id=None):
+    if elder_id:
+        rows = conn.execute(
+            """
+            SELECT * FROM life_story_cards
+            WHERE elder_id = ?
+            ORDER BY id DESC
+            """,
+            (elder_id,),
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM life_story_cards ORDER BY id DESC LIMIT 100").fetchall()
+    return [
+        {
+            "id": row["id"],
+            "elder_id": row["elder_id"],
+            "section": row["section"],
+            "title": row["title"],
+            "content": row["content"],
+            "care_meaning": row["care_meaning"],
+            "confidence": row["confidence"],
+            "status": row["status"],
+            "evidence": decode(row["evidence"], []),
+            "generated_by": row["generated_by"],
+            "created_at": row["created_at"],
+        }
+        for row in rows
+    ]
+
+
+def get_care_experiences(conn, elder_id=None):
+    if elder_id:
+        rows = conn.execute(
+            """
+            SELECT * FROM care_experiences
+            WHERE elder_id = ?
+            ORDER BY id DESC
+            """,
+            (elder_id,),
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM care_experiences ORDER BY id DESC LIMIT 100").fetchall()
+    return [
+        {
+            "id": row["id"],
+            "elder_id": row["elder_id"],
+            "task_type": row["task_type"],
+            "method": row["method"],
+            "why_it_works": row["why_it_works"],
+            "source": row["source"],
+            "confidence": row["confidence"],
+            "safety": row["safety"],
+            "status": row["status"],
+            "created_at": row["created_at"],
+        }
+        for row in rows
+    ]
+
+
+def get_task_suggestions(conn, task_id=None):
+    if task_id:
+        rows = conn.execute(
+            """
+            SELECT * FROM task_suggestions
+            WHERE task_id = ?
+            ORDER BY id DESC
+            """,
+            (task_id,),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """
+            SELECT s.*
+            FROM task_suggestions s
+            JOIN (
+              SELECT task_id, MAX(id) AS max_id
+              FROM task_suggestions
+              GROUP BY task_id
+            ) latest ON s.id = latest.max_id
+            ORDER BY s.generated_at DESC
+            """
+        ).fetchall()
+    return [
+        {
+            "id": row["id"],
+            "task_id": row["task_id"],
+            "elder_id": row["elder_id"],
+            "headline": row["headline"],
+            "action": row["action"],
+            "script": row["script"],
+            "safety": row["safety"],
+            "source_summary": row["source_summary"],
+            "confidence": row["confidence"],
+            "evidence": decode(row["evidence"], []),
+            "generated_at": row["generated_at"],
+        }
+        for row in rows
+    ]
+
+
+def latest_task_suggestion_map(conn):
+    return {item["task_id"]: item for item in get_task_suggestions(conn)}
+
+
+def get_pending_confirmations(conn, elder_id=None):
+    if elder_id:
+        rows = conn.execute(
+            """
+            SELECT * FROM pending_confirmations
+            WHERE elder_id = ?
+            ORDER BY id DESC
+            """,
+            (elder_id,),
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM pending_confirmations ORDER BY id DESC LIMIT 100").fetchall()
+    return [
+        {
+            "id": row["id"],
+            "elder_id": row["elder_id"],
+            "title": row["title"],
+            "content": row["content"],
+            "suggested_value": row["suggested_value"],
+            "source": row["source"],
+            "confidence": row["confidence"],
+            "status": row["status"],
+            "resolution": row["resolution"],
+            "created_at": row["created_at"],
+            "resolved_at": row["resolved_at"],
+        }
+        for row in rows
+    ]
+
+
+def get_family_story_inputs(conn, elder_id=None):
+    if elder_id:
+        rows = conn.execute(
+            """
+            SELECT * FROM family_story_inputs
+            WHERE elder_id = ?
+            ORDER BY id DESC
+            """,
+            (elder_id,),
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM family_story_inputs ORDER BY id DESC LIMIT 100").fetchall()
+    return [
+        {
+            "id": row["id"],
+            "elder_id": row["elder_id"],
+            "author": row["author"],
+            "content": row["content"],
+            "created_at": row["created_at"],
+            "status": row["status"],
+        }
+        for row in rows
+    ]
+
+
+def get_care_photos(conn, elder_id=None):
+    if elder_id:
+        rows = conn.execute(
+            """
+            SELECT * FROM care_photos
+            WHERE elder_id = ?
+            ORDER BY id DESC
+            LIMIT 30
+            """,
+            (elder_id,),
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM care_photos ORDER BY id DESC LIMIT 30").fetchall()
+    return [
+        {
+            "id": row["id"],
+            "elder_id": row["elder_id"],
+            "task_id": row["task_id"],
+            "image_data": row["image_data"],
+            "caption": row["caption"],
+            "created_at": row["created_at"],
+            "visible_to_family": bool(row["visible_to_family"]),
+        }
+        for row in rows
+    ]
+
+
+def suggestion_for_task(task, suggestion=None):
+    if not suggestion:
+        return {
+            "task_id": task["id"],
+            "elder_id": task["elderId"],
+            "headline": task["actionTitle"],
+            "action": task["mainAction"],
+            "script": task["script"],
+            "safety": task["safetyText"],
+            "source_summary": task["confidenceNote"],
+            "confidence": task["confidence"],
+            "evidence": task["evidence"],
+            "generated_at": "",
+        }
+    return suggestion
+
+
+def get_current_task_payload(conn):
+    tasks = get_tasks(conn)
+    suggestions = latest_task_suggestion_map(conn)
+    current = next((task for task in tasks if task["status"] not in ("已完成", "完成")), None) or (tasks[-1] if tasks else None)
+    if not current:
+        return {"task": None, "elder": None, "suggestion": None, "remaining": 0}
+    elders = get_elders(conn)
+    remaining = len([task for task in tasks if task["status"] not in ("已完成", "完成")])
+    return {
+        "task": current,
+        "elder": elders.get(current["elderId"]),
+        "suggestion": suggestion_for_task(current, suggestions.get(current["id"])),
+        "remaining": remaining,
+    }
+
+
 def gather_profile_context(conn, elder_id):
     elders = get_elders(conn)
     elder = elders.get(elder_id)
@@ -684,6 +1129,20 @@ def gather_profile_context(conn, elder_id):
         "tasks": tasks_for_elder,
         "feedback": feedback[:20],
         "external_records": external_records[:50],
+    }
+
+
+def gather_daily_summary_context(conn):
+    return {
+        "elders": get_elders(conn),
+        "tasks": get_tasks(conn),
+        "feedback": get_feedback(conn)[:80],
+        "family_inputs": get_family_story_inputs(conn)[:80],
+        "life_story_cards": get_life_story_cards(conn)[:100],
+        "care_experiences": get_care_experiences(conn)[:100],
+        "pending_confirmations": [
+            item for item in get_pending_confirmations(conn) if item["status"] == "pending"
+        ][:50],
     }
 
 
@@ -709,6 +1168,119 @@ def save_ai_profile(conn, elder_id, result):
         "warning": warning,
         "created_at": now,
     }
+
+
+def save_daily_summary(conn, result):
+    now = dt.datetime.now().isoformat(timespec="seconds")
+    summary = result.get("summary", {})
+    generated_by = result.get("generated_by", "unknown")
+    model = result.get("model", "")
+    warning = result.get("warning", "")
+    saved = {"story_cards": [], "care_experiences": [], "task_suggestions": [], "pending_confirmations": []}
+
+    conn.execute("DELETE FROM task_suggestions")
+
+    for card in summary.get("story_cards", [])[:40]:
+        elder_id = str(card.get("elder_id") or "").strip()
+        if not elder_id:
+            continue
+        cur = conn.execute(
+            """
+            INSERT INTO life_story_cards (
+              elder_id, section, title, content, care_meaning, confidence, status,
+              evidence, generated_by, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                elder_id,
+                str(card.get("section") or "照护要点"),
+                str(card.get("title") or "新的故事卡"),
+                str(card.get("content") or ""),
+                str(card.get("care_meaning") or ""),
+                str(card.get("confidence") or "中"),
+                str(card.get("status") or "active"),
+                encode(card.get("evidence") or []),
+                generated_by,
+                now,
+            ),
+        )
+        saved["story_cards"].append(cur.lastrowid)
+
+    for item in summary.get("care_experiences", [])[:40]:
+        elder_id = str(item.get("elder_id") or "").strip()
+        if not elder_id:
+            continue
+        cur = conn.execute(
+            """
+            INSERT INTO care_experiences (
+              elder_id, task_type, method, why_it_works, source, confidence, safety, status, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                elder_id,
+                str(item.get("task_type") or "通用照护"),
+                str(item.get("method") or ""),
+                str(item.get("why_it_works") or ""),
+                str(item.get("source") or generated_by),
+                str(item.get("confidence") or "中"),
+                str(item.get("safety") or "医疗和高风险事项按机构流程。"),
+                str(item.get("status") or "active"),
+                now,
+            ),
+        )
+        saved["care_experiences"].append(cur.lastrowid)
+
+    for item in summary.get("task_suggestions", [])[:80]:
+        task_id = str(item.get("task_id") or "").strip()
+        elder_id = str(item.get("elder_id") or "").strip()
+        if not task_id or not elder_id:
+            continue
+        cur = conn.execute(
+            """
+            INSERT INTO task_suggestions (
+              task_id, elder_id, headline, action, script, safety, source_summary,
+              confidence, evidence, generated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                task_id,
+                elder_id,
+                str(item.get("headline") or ""),
+                str(item.get("action") or ""),
+                str(item.get("script") or ""),
+                str(item.get("safety") or "异常就停，按机构流程。"),
+                str(item.get("source_summary") or ""),
+                int(item.get("confidence") or 60),
+                encode(item.get("evidence") or []),
+                now,
+            ),
+        )
+        saved["task_suggestions"].append(cur.lastrowid)
+
+    for item in summary.get("pending_confirmations", [])[:30]:
+        elder_id = str(item.get("elder_id") or "").strip()
+        if not elder_id:
+            continue
+        cur = conn.execute(
+            """
+            INSERT INTO pending_confirmations (
+              elder_id, title, content, suggested_value, source, confidence, status, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                elder_id,
+                str(item.get("title") or "待确认信息"),
+                str(item.get("content") or ""),
+                str(item.get("suggested_value") or ""),
+                str(item.get("source") or generated_by),
+                str(item.get("confidence") or "低"),
+                str(item.get("status") or "pending"),
+                now,
+            ),
+        )
+        saved["pending_confirmations"].append(cur.lastrowid)
+
+    return {"saved": saved, "generated_by": generated_by, "model": model, "warning": warning, "created_at": now}
 
 
 def sync_external_records(conn, elder_id):
@@ -745,6 +1317,159 @@ def sync_external_records(conn, elder_id):
         )
         inserted += 1
     return {"records": records, "inserted": inserted}
+
+
+def create_family_story_input(conn, payload):
+    elder_id = str(payload.get("elder_id") or "").strip()
+    if not elder_id:
+        raise ValueError("elder_id required")
+    if not conn.execute("SELECT id FROM elders WHERE id = ?", (elder_id,)).fetchone():
+        raise ValueError("elder_id not found")
+    author = str(payload.get("author") or "家属").strip()
+    content = str(payload.get("content") or "").strip()
+    if not content:
+        raise ValueError("content required")
+    now = dt.datetime.now().isoformat(timespec="seconds")
+    cur = conn.execute(
+        """
+        INSERT INTO family_story_inputs (elder_id, author, content, created_at, status)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (elder_id, author, content, now, "pending_summary"),
+    )
+    conn.execute(
+        """
+        INSERT INTO observations (elder_id, time_label, title, text, tag, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (elder_id, dt.datetime.now().strftime("%H:%M"), "家属补充", content, "家属", now),
+    )
+    return {
+        "id": cur.lastrowid,
+        "elder_id": elder_id,
+        "author": author,
+        "content": content,
+        "created_at": now,
+        "status": "pending_summary",
+    }
+
+
+def resolve_confirmation(conn, confirmation_id, payload):
+    row = conn.execute("SELECT * FROM pending_confirmations WHERE id = ?", (confirmation_id,)).fetchone()
+    if not row:
+        raise ValueError("confirmation not found")
+    action = str(payload.get("action") or "confirm").strip()
+    edited_value = str(payload.get("value") or row["suggested_value"]).strip()
+    now = dt.datetime.now().isoformat(timespec="seconds")
+    status = {"confirm": "confirmed", "edit": "edited", "deny": "denied"}.get(action, action)
+    conn.execute(
+        """
+        UPDATE pending_confirmations
+        SET status = ?, resolution = ?, resolved_at = ?
+        WHERE id = ?
+        """,
+        (status, edited_value, now, confirmation_id),
+    )
+    if status in ("confirmed", "edited") and edited_value:
+        cur = conn.execute(
+            """
+            INSERT INTO life_story_cards (
+              elder_id, section, title, content, care_meaning, confidence, status,
+              evidence, generated_by, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                row["elder_id"],
+                "家属确认",
+                row["title"],
+                edited_value,
+                "后续照护建议可引用这条已确认信息。",
+                "高",
+                "active",
+                encode([{"source": row["source"], "time": row["created_at"], "text": row["content"], "confidence": row["confidence"]}]),
+                "family-confirmed",
+                now,
+            ),
+        )
+        story_card_id = cur.lastrowid
+    else:
+        story_card_id = None
+    return {"id": confirmation_id, "status": status, "resolution": edited_value, "story_card_id": story_card_id}
+
+
+def complete_task(conn, task_id, payload):
+    task = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    if not task:
+        raise ValueError("task not found")
+    now = dt.datetime.now()
+    created_at = now.isoformat(timespec="seconds")
+    note = str(payload.get("note") or "已完成").strip()
+    voice_note = str(payload.get("voice_note") or "").strip()
+    effect = str(payload.get("effect") or "已完成").strip()
+    observations = payload.get("observations") or []
+    if not isinstance(observations, list):
+        observations = [str(observations)]
+    reaction = "；".join([item for item in ["已完成", voice_note, note if note != "已完成" else ""] if item])
+    cur = conn.execute(
+        """
+        INSERT INTO feedback (
+          task_id, elder_id, effect, observations, voice_note, note, reaction, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (task_id, task["elder_id"], effect, encode(observations), voice_note, note, reaction, created_at),
+    )
+    conn.execute("UPDATE tasks SET status = ? WHERE id = ?", ("已完成", task_id))
+    conn.execute(
+        """
+        INSERT INTO observations (elder_id, time_label, title, text, tag, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (task["elder_id"], now.strftime("%H:%M"), f"{task['title']}完成", reaction, "完成", created_at),
+    )
+    return {"id": cur.lastrowid, "task_id": task_id, "elder_id": task["elder_id"], "created_at": created_at}
+
+
+def create_help_request(conn, task_id, payload):
+    task = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    if not task:
+        raise ValueError("task not found")
+    now = dt.datetime.now()
+    created_at = now.isoformat(timespec="seconds")
+    note = str(payload.get("note") or "需要帮助").strip()
+    conn.execute(
+        """
+        INSERT INTO observations (elder_id, time_label, title, text, tag, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (task["elder_id"], now.strftime("%H:%M"), f"{task['title']}需要帮助", note, "求助", created_at),
+    )
+    return {"task_id": task_id, "elder_id": task["elder_id"], "note": note, "created_at": created_at}
+
+
+def save_care_photos(conn, payload):
+    elder_id = str(payload.get("elder_id") or "").strip()
+    task_id = str(payload.get("task_id") or "").strip()
+    photos = payload.get("photos") or []
+    caption = str(payload.get("caption") or "").strip()
+    if not elder_id or not task_id:
+        raise ValueError("elder_id and task_id required")
+    if not isinstance(photos, list):
+        raise ValueError("photos must be a list")
+    now = dt.datetime.now().isoformat(timespec="seconds")
+    saved = []
+    for image_data in photos[:3]:
+        text = str(image_data or "")
+        if not text.startswith("data:image/"):
+            continue
+        cur = conn.execute(
+            """
+            INSERT INTO care_photos (elder_id, task_id, image_data, caption, created_at, visible_to_family)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (elder_id, task_id, text, caption, now, 1),
+        )
+        saved.append(cur.lastrowid)
+    return {"saved": saved, "created_at": now}
 
 
 def create_feedback(conn, payload):
@@ -822,9 +1547,18 @@ class CareActionHandler(BaseHTTPRequestHandler):
                         "tasks": get_tasks(conn),
                         "feedback": get_feedback(conn),
                         "ai_profiles": latest_ai_profile_map(conn),
+                        "life_story_cards": get_life_story_cards(conn),
+                        "care_experiences": get_care_experiences(conn),
+                        "task_suggestions": latest_task_suggestion_map(conn),
+                        "pending_confirmations": get_pending_confirmations(conn),
+                        "family_story_inputs": get_family_story_inputs(conn),
+                        "care_photos": get_care_photos(conn),
                     })
             if path == "/api/integrations/status":
                 return self.send_json(integration_status())
+            if path == "/api/current-task":
+                with connect() as conn:
+                    return self.send_json(get_current_task_payload(conn))
             if path == "/api/source/records":
                 query = parse_qs(parsed.query)
                 elder_id = query.get("elder_id", [""])[0]
@@ -859,6 +1593,22 @@ class CareActionHandler(BaseHTTPRequestHandler):
                     if not profiles:
                         return self.send_json({"profile": None})
                     return self.send_json({"profile": profiles[0]})
+            if path.startswith("/api/life-story/"):
+                elder_id = unquote(path.removeprefix("/api/life-story/"))
+                with connect() as conn:
+                    return self.send_json({"cards": get_life_story_cards(conn, elder_id)})
+            if path.startswith("/api/care-experiences/"):
+                elder_id = unquote(path.removeprefix("/api/care-experiences/"))
+                with connect() as conn:
+                    return self.send_json({"experiences": get_care_experiences(conn, elder_id)})
+            if path.startswith("/api/confirmations/"):
+                elder_id = unquote(path.removeprefix("/api/confirmations/"))
+                with connect() as conn:
+                    return self.send_json({"confirmations": get_pending_confirmations(conn, elder_id)})
+            if path.startswith("/api/photos/"):
+                elder_id = unquote(path.removeprefix("/api/photos/"))
+                with connect() as conn:
+                    return self.send_json({"photos": get_care_photos(conn, elder_id)})
             return self.send_static(path)
         except Exception as exc:
             return self.send_json({"error": str(exc)}, status=500)
@@ -866,6 +1616,47 @@ class CareActionHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         parsed = urlparse(self.path)
         try:
+            if parsed.path == "/api/daily-summary":
+                with connect() as conn:
+                    context = gather_daily_summary_context(conn)
+                    generated = generate_daily_summary(context)
+                    saved = save_daily_summary(conn, generated)
+                    conn.commit()
+                    return self.send_json({"ok": True, "summary": generated.get("summary", {}), **saved}, status=201)
+            if parsed.path == "/api/family/story-input":
+                payload = self.read_json()
+                with connect() as conn:
+                    item = create_family_story_input(conn, payload)
+                    conn.commit()
+                return self.send_json({"ok": True, "story_input": item}, status=201)
+            if parsed.path == "/api/photos":
+                payload = self.read_json()
+                with connect() as conn:
+                    result = save_care_photos(conn, payload)
+                    conn.commit()
+                return self.send_json({"ok": True, **result}, status=201)
+            if parsed.path.startswith("/api/tasks/") and parsed.path.endswith("/complete"):
+                task_id = unquote(parsed.path.removeprefix("/api/tasks/").removesuffix("/complete"))
+                payload = self.read_json()
+                with connect() as conn:
+                    result = complete_task(conn, task_id, payload)
+                    current = get_current_task_payload(conn)
+                    conn.commit()
+                return self.send_json({"ok": True, "completed": result, "current": current}, status=201)
+            if parsed.path.startswith("/api/tasks/") and parsed.path.endswith("/help"):
+                task_id = unquote(parsed.path.removeprefix("/api/tasks/").removesuffix("/help"))
+                payload = self.read_json()
+                with connect() as conn:
+                    result = create_help_request(conn, task_id, payload)
+                    conn.commit()
+                return self.send_json({"ok": True, "help": result}, status=201)
+            if parsed.path.startswith("/api/confirmations/") and parsed.path.endswith("/resolve"):
+                confirmation_id = unquote(parsed.path.removeprefix("/api/confirmations/").removesuffix("/resolve"))
+                payload = self.read_json()
+                with connect() as conn:
+                    result = resolve_confirmation(conn, int(confirmation_id), payload)
+                    conn.commit()
+                return self.send_json({"ok": True, "confirmation": result})
             if parsed.path == "/api/feedback":
                 payload = self.read_json()
                 with connect() as conn:

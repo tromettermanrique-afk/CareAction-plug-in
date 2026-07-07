@@ -6,6 +6,13 @@ import sqlite3
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+except ImportError:
+    psycopg = None
+    dict_row = None
+
 
 BACKEND_DIR = Path(__file__).resolve().parent
 
@@ -34,11 +41,12 @@ def integration_status():
             "configured": source_type != "none",
             "api_base": bool(os.environ.get("EXTERNAL_API_BASE") or os.environ.get("EXTERNAL_API_RECORDS_URL")),
             "sqlite_path": os.environ.get("EXTERNAL_SQLITE_PATH", ""),
+            "postgres_url": bool(os.environ.get("EXTERNAL_POSTGRES_URL") or os.environ.get("EXTERNAL_DATABASE_URL")),
         },
         "ai": {
             "provider": os.environ.get("AI_PROVIDER", "openai-compatible"),
             "configured": bool(os.environ.get("AI_API_KEY")),
-            "api_base": os.environ.get("AI_API_BASE", "https://api.openai.com/v1"),
+            "api_base": os.environ.get("AI_API_BASE", "https://api.deepseek.com"),
             "model": os.environ.get("AI_MODEL", ""),
             "fallback": "local-rule",
         },
@@ -113,6 +121,28 @@ def records_from_sqlite(elder_id):
     return [record for record in (normalize_record(dict(row), "外部SQLite") for row in rows) if record]
 
 
+def records_from_postgres(elder_id):
+    if psycopg is None:
+        raise RuntimeError("Missing psycopg. Run: pip install -r backend/requirements.txt")
+    postgres_url = os.environ.get("EXTERNAL_POSTGRES_URL") or os.environ.get("EXTERNAL_DATABASE_URL", "")
+    postgres_url = postgres_url.strip()
+    if not postgres_url:
+        return []
+    query = os.environ.get(
+        "EXTERNAL_POSTGRES_QUERY",
+        """
+        SELECT type, source, time_label AS time, text, confidence
+        FROM care_records
+        WHERE elder_id = %s
+        ORDER BY time_label DESC
+        LIMIT 50
+        """,
+    )
+    with psycopg.connect(postgres_url, row_factory=dict_row) as conn:
+        rows = conn.execute(query, (elder_id,)).fetchall()
+    return [record for record in (normalize_record(dict(row), "外部Postgres") for row in rows) if record]
+
+
 def fetch_external_records(elder_id):
     load_env()
     source_type = os.environ.get("EXTERNAL_SOURCE_TYPE", "none").lower()
@@ -122,6 +152,8 @@ def fetch_external_records(elder_id):
         return records_from_api(elder_id)
     if source_type == "sqlite":
         return records_from_sqlite(elder_id)
+    if source_type in ("postgres", "postgresql", "neon"):
+        return records_from_postgres(elder_id)
     raise ValueError(f"暂不支持的外部数据源: {source_type}")
 
 
@@ -192,6 +224,150 @@ def local_profile(context):
     }
 
 
+def local_daily_summary(context):
+    elders = context.get("elders", {})
+    tasks = context.get("tasks", [])
+    feedback = context.get("feedback", [])
+    family_inputs = context.get("family_inputs", [])
+    story_cards = []
+    care_experiences = []
+    task_suggestions = []
+    pending_confirmations = []
+
+    for elder_id, elder in elders.items():
+        observations = elder.get("observations", [])
+        first_family = elder.get("familySummary", ["先尊重老人习惯，再开始照护。"])[0]
+        preference = "、".join(elder.get("preferenceTags", [])[:3]) or "熟悉的人和物"
+        avoid = elder.get("avoidTags", ["不要催促"])[0]
+        story_cards.append(
+            {
+                "elder_id": elder_id,
+                "section": "生活习惯",
+                "title": f"{elder['name']}的安抚线索",
+                "content": f"{elder['name']}对{preference}更熟悉，照护前先给出熟悉线索。",
+                "care_meaning": f"开始任务前先提醒：{first_family}",
+                "confidence": "中",
+                "status": "active",
+                "evidence": [
+                    {
+                        "source_type": "家属摘要",
+                        "source": elder.get("contact", "家属"),
+                        "time": "建档",
+                        "text": first_family,
+                        "confidence": "中",
+                    }
+                ],
+            }
+        )
+        if observations:
+            item = observations[0]
+            story_cards.append(
+                {
+                    "elder_id": elder_id,
+                    "section": "近期变化",
+                    "title": item.get("title", "近期观察"),
+                    "content": item.get("text", ""),
+                    "care_meaning": "后续任务先观察当天状态，不硬推。",
+                    "confidence": "中",
+                    "status": "active",
+                    "evidence": [
+                        {
+                            "source_type": item.get("tag", "观察"),
+                            "source": item.get("tag", "记录"),
+                            "time": item.get("time", ""),
+                            "text": item.get("text", ""),
+                            "confidence": "中",
+                        }
+                    ],
+                }
+            )
+        care_experiences.append(
+            {
+                "elder_id": elder_id,
+                "task_type": "通用照护",
+                "method": f"先顺着{preference}切入，再开始任务。",
+                "why_it_works": first_family,
+                "source": "家属摘要",
+                "confidence": "中",
+                "safety": "只做沟通安抚；医疗、急救、约束按机构流程。",
+                "status": "active",
+            }
+        )
+        if avoid:
+            pending_confirmations.append(
+                {
+                    "elder_id": elder_id,
+                    "title": f"确认禁忌：{avoid}",
+                    "content": f"系统识别到“{avoid}”可能影响照护配合度，建议家属或管理员确认。",
+                    "suggested_value": avoid,
+                    "source": "本地规则",
+                    "confidence": "低",
+                    "status": "pending",
+                }
+            )
+
+    for task in tasks:
+        elder = elders.get(task.get("elderId"))
+        if not elder:
+            continue
+        safety = task.get("safetyText", "异常就停，按机构流程。")
+        if task.get("safetyLevel") == "high":
+            safety = "高风险。先人工确认，遵循机构流程。"
+        task_suggestions.append(
+            {
+                "task_id": task["id"],
+                "elder_id": task["elderId"],
+                "headline": task.get("actionTitle") or task.get("title", ""),
+                "action": task.get("mainAction", ""),
+                "script": task.get("script", ""),
+                "safety": safety,
+                "source_summary": task.get("confidenceNote") or "来自现有任务证据和老人画像。",
+                "confidence": task.get("confidence", 60),
+                "evidence": task.get("evidence", [])[:3],
+            }
+        )
+
+    for item in family_inputs:
+        elder_id = item.get("elder_id")
+        elder = elders.get(elder_id)
+        if not elder:
+            continue
+        text = item.get("content", "")
+        story_cards.append(
+            {
+                "elder_id": elder_id,
+                "section": "家属补充",
+                "title": "家属补充的小故事",
+                "content": text,
+                "care_meaning": "下次照护前可先用家属补充的熟悉线索建立信任。",
+                "confidence": "中",
+                "status": "active",
+                "evidence": [
+                    {
+                        "source_type": "家属输入",
+                        "source": item.get("author", "家属"),
+                        "time": item.get("created_at", ""),
+                        "text": text,
+                        "confidence": "中",
+                    }
+                ],
+            }
+        )
+
+    return {
+        "summary": {
+            "story_cards": story_cards[:12],
+            "care_experiences": care_experiences[:12],
+            "task_suggestions": task_suggestions[:20],
+            "pending_confirmations": pending_confirmations[:8],
+        },
+        "generated_by": "local-rule",
+        "model": "local-rule",
+        "warning": "",
+        "raw": "",
+    }
+
+
 def extract_json(text):
     text = text.strip()
     if text.startswith("```"):
@@ -212,7 +388,7 @@ def call_ai_profile(context):
         result["warning"] = "未配置 AI_API_KEY，已使用本地规则生成。"
         return result
 
-    api_base = os.environ.get("AI_API_BASE", "https://api.openai.com/v1").rstrip("/")
+    api_base = os.environ.get("AI_API_BASE", "https://api.deepseek.com").rstrip("/")
     model = os.environ.get("AI_MODEL", "")
     if not model:
         result = local_profile(context)
@@ -273,4 +449,119 @@ def generate_care_profile(context):
     except Exception as exc:
         result = local_profile(context)
         result["warning"] = f"AI 调用失败，已使用本地规则生成: {exc}"
+        return result
+
+
+def call_ai_daily_summary(context):
+    load_env()
+    api_key = os.environ.get("AI_API_KEY", "")
+    if not api_key:
+        result = local_daily_summary(context)
+        result["warning"] = "未配置 AI_API_KEY，已使用本地规则生成每日汇总。"
+        return result
+
+    api_base = os.environ.get("AI_API_BASE", "https://api.deepseek.com").rstrip("/")
+    model = os.environ.get("AI_MODEL", "")
+    if not model:
+        result = local_daily_summary(context)
+        result["warning"] = "未配置 AI_MODEL，已使用本地规则生成每日汇总。"
+        return result
+
+    safe_context = redact_context(context)
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "你是 CareAction 的养老照护信息整理员。你的任务是把已有老人认知、家属输入、"
+                "护理记录和有效经验整理成可执行照护建议。只输出 JSON，不要 Markdown。"
+                "边界：不做医疗诊断，不给用药建议，不替代急救、约束、跌倒、吞咽等机构流程。"
+                "没有证据时不要编造偏好；低置信或冲突内容必须放入 pending_confirmations。"
+            ),
+        },
+        {
+            "role": "user",
+            "content": json.dumps(
+                {
+                    "任务": "生成每日汇总，用于人生故事书、有效照护经验库和当前任务大卡片。",
+                    "输出格式": {
+                        "summary": {
+                            "story_cards": [
+                                {
+                                    "elder_id": "string",
+                                    "section": "人生经历/重要关系/生活习惯/喜欢的事/害怕禁忌/近期变化/照护要点",
+                                    "title": "string",
+                                    "content": "给家属和管理端看的故事卡内容",
+                                    "care_meaning": "转化成照护行动的含义",
+                                    "confidence": "高/中/低",
+                                    "status": "active",
+                                    "evidence": [
+                                        {
+                                            "source_type": "家属输入/护理记录/观察/经验",
+                                            "source": "string",
+                                            "time": "string",
+                                            "text": "证据摘要",
+                                            "confidence": "高/中/低",
+                                        }
+                                    ],
+                                }
+                            ],
+                            "care_experiences": [
+                                {
+                                    "elder_id": "string",
+                                    "task_type": "吃饭/洗漱/转移/活动/沟通/通用照护",
+                                    "method": "可复用的好方法",
+                                    "why_it_works": "为什么有效",
+                                    "source": "来源",
+                                    "confidence": "高/中/低",
+                                    "safety": "安全边界",
+                                    "status": "active",
+                                }
+                            ],
+                            "task_suggestions": [
+                                {
+                                    "task_id": "string",
+                                    "elder_id": "string",
+                                    "headline": "一句话建议",
+                                    "action": "护工现在怎么做",
+                                    "script": "护工可以照着说的话",
+                                    "safety": "最关键注意事项",
+                                    "source_summary": "依据摘要",
+                                    "confidence": 0,
+                                    "evidence": [{"source": "string", "time": "string", "text": "string", "confidence": "高/中/低"}],
+                                }
+                            ],
+                            "pending_confirmations": [
+                                {
+                                    "elder_id": "string",
+                                    "title": "待确认标题",
+                                    "content": "为什么需要确认",
+                                    "suggested_value": "建议写入内容",
+                                    "source": "来源",
+                                    "confidence": "低",
+                                    "status": "pending",
+                                }
+                            ],
+                        }
+                    },
+                    "数据": safe_context,
+                },
+                ensure_ascii=False,
+            ),
+        },
+    ]
+    payload = {"model": model, "messages": messages, "temperature": 0.2}
+    data = http_json(f"{api_base}/chat/completions", token=api_key, method="POST", payload=payload, timeout=90)
+    content = data["choices"][0]["message"]["content"]
+    parsed = extract_json(content)
+    if "summary" not in parsed:
+        parsed = {"summary": parsed}
+    return {"summary": parsed["summary"], "generated_by": "ai", "model": model, "raw": content}
+
+
+def generate_daily_summary(context):
+    try:
+        return call_ai_daily_summary(context)
+    except Exception as exc:
+        result = local_daily_summary(context)
+        result["warning"] = f"AI 调用失败，已使用本地规则生成每日汇总: {exc}"
         return result

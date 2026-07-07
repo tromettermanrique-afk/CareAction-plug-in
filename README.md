@@ -74,12 +74,31 @@ EXTERNAL_SQLITE_PATH=C:\path\to\third_party.sqlite3
 EXTERNAL_SQLITE_QUERY=SELECT type, source, time_label AS time, text, confidence FROM care_records WHERE elder_id = ? LIMIT 50
 ```
 
-如果要调用 AI API：
+如果对方给的是 PostgreSQL / Neon 只读库：
 
 ```text
-AI_API_BASE=https://api.openai.com/v1
-AI_API_KEY=你的AI密钥
-AI_MODEL=你的模型名
+EXTERNAL_SOURCE_TYPE=postgres
+EXTERNAL_POSTGRES_URL=postgresql://readonly_user:password@host/dbname?sslmode=require
+EXTERNAL_POSTGRES_QUERY=SELECT type, source, time_label AS time, text, confidence FROM care_records WHERE elder_id = %s ORDER BY time_label DESC LIMIT 50
+```
+
+外部查询结果至少要能映射出这些字段：
+
+```text
+type        记录类型，例如 家属输入 / 护理记录 / 观察 / 经验
+source      来源，例如 家属端 / 护理系统 / 张护工
+time        时间
+text        内容
+confidence 置信度，高 / 中 / 低
+```
+
+如果要调用 DeepSeek AI API：
+
+```text
+AI_PROVIDER=openai-compatible
+AI_API_BASE=https://api.deepseek.com
+AI_API_KEY=你的DeepSeek API Key
+AI_MODEL=deepseek-v4-pro
 ```
 
 未配置 `AI_API_KEY` 时，`/api/ai/profile/generate` 会使用本地规则生成画像，便于先跑通流程。
@@ -111,12 +130,21 @@ postgresql://user:password@host/dbname?sslmode=require
 
 ```text
 DATABASE_URL=Neon给你的连接串
-AI_API_BASE=你的AI接口地址
-AI_API_KEY=你的AI密钥
-AI_MODEL=你的模型名
+AI_API_BASE=https://api.deepseek.com
+AI_API_KEY=你的DeepSeek API Key
+AI_MODEL=deepseek-v4-pro
+EXTERNAL_SOURCE_TYPE=none
 ```
 
 如果还没有 AI Key，可以先不填，后端会使用本地规则生成画像。
+
+如果要接外部 PostgreSQL，再加：
+
+```text
+EXTERNAL_SOURCE_TYPE=postgres
+EXTERNAL_POSTGRES_URL=对方给你的只读Postgres连接串
+EXTERNAL_POSTGRES_QUERY=对方字段对应后的查询SQL
+```
 
 ### 3. 打开 Render 地址
 
@@ -157,3 +185,19 @@ window.CAREACTION_API_BASE = "http://192.168.31.142:3000";
 ```
 
 电脑和手机必须连同一个 Wi-Fi。
+
+## 配置自检
+
+本地或 Render Shell 里运行：
+
+```bash
+python backend/check_config.py
+```
+
+它会检查：
+
+- CareAction 自己的数据库是否连通
+- 外部数据源是否能读取记录
+- DeepSeek API 是否能返回结果
+
+脚本会隐藏密钥，只显示连接状态。
