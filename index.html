@@ -3320,6 +3320,7 @@
     }
 
     .admin-hero h2,
+    .admin-raw-panel h2,
     .admin-roster-panel h2,
     .admin-panel h2 {
       margin: 0;
@@ -3330,6 +3331,7 @@
     }
 
     .admin-hero p,
+    .admin-raw-panel p,
     .admin-roster-panel p,
     .admin-panel p {
       margin: 0;
@@ -3506,9 +3508,160 @@
       line-height: 1.36;
     }
 
+    .admin-raw-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.06);
+    }
+
+    .raw-input-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-subsection {
+      display: grid;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .admin-subsection + .admin-subsection {
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .admin-subsection h3 {
+      margin: 0;
+      color: #1a1a2e;
+      font-size: 21px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .raw-input-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .raw-input-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .raw-input-field label {
+      color: #4a5568;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .raw-input-field input,
+    .raw-input-field select,
+    .raw-input-field textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      color: #1a1a2e;
+      background: #fff;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font: inherit;
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    .raw-input-field textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .raw-input-wide {
+      grid-column: 1 / -1;
+    }
+
+    .raw-input-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .raw-input-actions .primary-button {
+      width: auto;
+      min-width: 180px;
+      min-height: 50px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .raw-input-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .raw-input-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      padding: 12px;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+    }
+
+    .raw-input-item h3 {
+      margin: 0;
+      color: #1a1a2e;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .raw-input-item p {
+      margin: 6px 0 0;
+      color: #4a5568;
+      font-size: 16px;
+      line-height: 1.42;
+    }
+
+    .raw-input-meta {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .raw-input-parse {
+      min-width: 108px;
+      min-height: 42px;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 10px;
+      color: #fff;
+      background: #3182ce;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .raw-input-parse:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
     @media (max-width: 1040px) {
       .admin-elder-row {
         grid-template-columns: 1fr 1fr;
+      }
+
+      .raw-input-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -3538,6 +3691,17 @@
 
       .admin-elder-row {
         grid-template-columns: 1fr;
+      }
+
+      .raw-input-grid,
+      .raw-input-item {
+        grid-template-columns: 1fr;
+      }
+
+      .raw-input-actions,
+      .raw-input-actions .primary-button,
+      .raw-input-parse {
+        width: 100%;
       }
     }
 
@@ -3870,12 +4034,10 @@
       <div class="login-intro">
         <div class="brand-mark">C</div>
         <h1 id="loginTitle">CareAction</h1>
-        <p>先登录，再进入自己的工作台。护工看当前任务，家属看老人近况。</p>
       </div>
       <div class="login-roles">
         <button class="login-role" type="button" data-login-role="caregiver">
           <strong>护工登录</strong>
-          <p>打开后只看当前要做的一件事。可语音播报，做完就反馈。</p>
           <span class="tag-row">
             <span class="tag success">当前任务</span>
             <span class="tag status">语音提醒</span>
@@ -3884,7 +4046,6 @@
         </button>
         <button class="login-role" type="button" data-login-role="family">
           <strong>家属登录</strong>
-          <p>查看老人今日近况、照片和护工反馈，也可以留言感谢。</p>
           <span class="tag-row">
             <span class="tag success">生活近况</span>
             <span class="tag status">活动照片</span>
@@ -3893,7 +4054,6 @@
         </button>
         <button class="login-role" type="button" data-login-role="admin">
           <strong>管理员登录</strong>
-          <p>查看人生故事书、有效经验库、待确认信息，并触发每日 AI 汇总。</p>
           <span class="tag-row">
             <span class="tag success">每日汇总</span>
             <span class="tag status">经验沉淀</span>
@@ -3960,7 +4120,6 @@
               <div class="section-heading">
                 <div>
                   <h2 id="todayHeading">现在做这件</h2>
-                  <p>只看当前时段。</p>
                 </div>
                 <span class="tag success" id="readySummary">第 1 件</span>
               </div>
@@ -4101,7 +4260,7 @@
                 </div>
                 <div class="profile-card">
                   <h3>安全</h3>
-                  <p>AI 只提醒。医疗和高风险，按机构流程。</p>
+                  <p>高风险按机构流程。</p>
                 </div>
               </div>
             </aside>
@@ -4114,7 +4273,6 @@
               <div class="section-heading">
                 <div>
                   <h2 id="whyHeading">为什么</h2>
-                  <p id="whyIntro">看 3 条来源。</p>
                 </div>
                 <span class="tag success" id="whyConfidenceTag">够用</span>
               </div>
@@ -4135,7 +4293,6 @@
               <div class="section-heading">
                 <div>
                   <h3>AI 怎么想</h3>
-                  <p>简单看一下。</p>
                 </div>
               </div>
               <div class="profile-summary">
@@ -4188,21 +4345,19 @@
                   <button class="quick-chip" data-observation="想找家属" type="button">想找家属</button>
                   <button class="quick-chip" data-observation="需护士查看" type="button">需护士查看</button>
                 </div>
-                <p class="helper-text">能点就点，不用打字。</p>
               </div>
 
               <div class="voice-note-panel">
                 <button class="voice-button" type="button" id="voiceNoteButton">语音<br />一句话</button>
                 <div>
                   <strong>语音补充</strong>
-                  <p id="voiceNoteText">可不说。要说就点左边。</p>
+                  <p id="voiceNoteText">未录音</p>
                 </div>
               </div>
 
               <div class="photo-upload">
                 <label for="photoUpload">今日照片（可选）</label>
                 <input id="photoUpload" type="file" accept="image/*" multiple />
-                <p class="helper-text">照片会给家属看，也会帮助更新老人画像。</p>
                 <div class="photo-preview" id="photoPreview"></div>
               </div>
 
@@ -4223,7 +4378,6 @@
               <div class="section-heading">
                 <div>
                   <h3>反馈后</h3>
-                  <p>系统记住，下次更准。</p>
                 </div>
               </div>
               <div class="timeline" id="feedbackTimeline">
@@ -4252,7 +4406,6 @@
           <div class="caregiver-page-head">
             <div>
               <h2 id="caregiverEldersHeading">看老人</h2>
-              <p>快速看偏好、禁忌和最近情况。</p>
             </div>
             <span class="tag status" id="caregiverElderCount">0 位</span>
           </div>
@@ -4280,7 +4433,7 @@
                   </div>
                   <button class="secondary-button compact-button" type="button" id="generateProfileButton">生成</button>
                 </div>
-                <p class="ai-profile-summary" id="aiProfileSummary">点生成，AI 会看记录。</p>
+                <p class="ai-profile-summary" id="aiProfileSummary">未生成。</p>
                 <div class="tag-row" id="aiRiskTags"></div>
                 <ul class="summary-list" id="aiProfileTips"></ul>
                 <div class="feedback-status" id="profileAiStatus" aria-live="polite"></div>
@@ -4306,7 +4459,6 @@
               <div class="section-heading">
                 <div>
                   <h3>最近情况</h3>
-                  <p>AI 用这些来给建议。</p>
                 </div>
                 <span class="tag status">近 14 天</span>
               </div>
@@ -4350,7 +4502,6 @@
 
       <section class="family-card">
         <h2>今日活动照片</h2>
-        <p>护工反馈后，照片会同步到这里。</p>
         <div class="family-photo-grid" id="familyPhotoGrid">
           <img alt="周雅琴坐在窗边休息" src="https://images.unsplash.com/photo-1581579438747-104c53d7fbc4?auto=format&fit=crop&w=600&q=80" />
           <img alt="温水和毛巾" src="https://images.unsplash.com/photo-1583947582886-f40ec95dd752?auto=format&fit=crop&w=600&q=80" />
@@ -4360,7 +4511,6 @@
 
       <section class="family-card">
         <h2>给护工留言</h2>
-        <p>一句感谢，会让今天更有力量。</p>
         <div class="comment-list" id="familyCommentList">
           <div class="comment-item">周敏：谢谢陈姐，妈妈看到围巾会安心很多。</div>
         </div>
@@ -4372,17 +4522,15 @@
 
       <section class="family-card">
         <h2>补充一个小故事</h2>
-        <p>写老人熟悉的习惯、称呼、喜欢或害怕的事。</p>
         <form class="family-story-form" id="familyStoryForm">
           <textarea id="familyStoryInput" placeholder="例：妈妈吃饭喜欢坐靠窗左侧，不喜欢别人催她第一口。"></textarea>
-          <button class="primary-button" type="submit">补充给系统</button>
+          <button class="primary-button" type="submit">提交</button>
         </form>
         <div class="feedback-status" id="familyStoryStatus" aria-live="polite"></div>
       </section>
 
       <section class="family-card">
         <h2>需要确认</h2>
-        <p>AI 不确定的信息，需要家属确认后才写入故事书。</p>
         <div class="comment-list" id="familyConfirmList"></div>
       </section>
     </main>
@@ -4393,7 +4541,6 @@
       <div>
         <span class="admin-eyebrow">CareAction Admin</span>
         <h1 id="adminTitle">个性化照护建议管理台</h1>
-        <p>把老人认知、家属补充和照护经验，沉淀成下一次任务里的可执行建议。</p>
       </div>
       <div class="admin-actions">
         <button class="primary-button" type="button" id="dailySummaryButton">今日汇总</button>
@@ -4405,7 +4552,6 @@
       <section class="admin-hero">
         <div>
           <h2>今天的建议层状态</h2>
-          <p>护工端只展示行动大卡；这里负责维护背后的故事书、经验库和确认流程。</p>
         </div>
         <div class="admin-metric-grid">
           <article class="admin-metric">
@@ -4429,13 +4575,125 @@
 
       <div class="feedback-status" id="dailySummaryStatus" aria-live="polite"></div>
 
+      <section class="admin-raw-panel">
+        <div class="admin-panel-head">
+          <div>
+            <h2>资料管理</h2>
+          </div>
+          <span class="tag warning">后台</span>
+        </div>
+
+        <div class="admin-subsection">
+          <h3>新老人登记</h3>
+          <form class="raw-input-form" id="elderRegisterForm">
+            <div class="raw-input-grid">
+              <div class="raw-input-field">
+                <label for="elderNameInput">姓名</label>
+                <input id="elderNameInput" required placeholder="周雅琴" />
+              </div>
+              <div class="raw-input-field">
+                <label for="elderRoomInput">房间</label>
+                <input id="elderRoomInput" required placeholder="302" />
+              </div>
+              <div class="raw-input-field">
+                <label for="elderAgeInput">年龄</label>
+                <input id="elderAgeInput" required type="number" min="0" max="120" placeholder="82" />
+              </div>
+              <div class="raw-input-field">
+                <label for="elderStatusInput">状态</label>
+                <input id="elderStatusInput" placeholder="轻中度认知障碍" />
+              </div>
+              <div class="raw-input-field">
+                <label for="elderContactInput">联系人</label>
+                <input id="elderContactInput" placeholder="女儿 周敏" />
+              </div>
+              <div class="raw-input-field">
+                <label for="elderMobilityInput">行动</label>
+                <input id="elderMobilityInput" placeholder="可扶行" />
+              </div>
+              <div class="raw-input-field">
+                <label for="elderDietInput">饮食</label>
+                <input id="elderDietInput" placeholder="软食，温热饮" />
+              </div>
+              <div class="raw-input-field">
+                <label for="elderPreferenceInput">偏好</label>
+                <input id="elderPreferenceInput" placeholder="沪剧、靠窗、温水" />
+              </div>
+              <div class="raw-input-field raw-input-wide">
+                <label for="elderAvoidInput">禁忌</label>
+                <input id="elderAvoidInput" placeholder="别催、别否定、避强光" />
+              </div>
+              <div class="raw-input-field raw-input-wide">
+                <label for="elderFamilySummaryInput">家属要点</label>
+                <input id="elderFamilySummaryInput" placeholder="叫她王校长会更配合" />
+              </div>
+              <div class="raw-input-field raw-input-wide">
+                <label for="elderNoteInput">入院备注</label>
+                <textarea id="elderNoteInput" placeholder="刚入院，晚间容易焦虑，先说明再操作。"></textarea>
+              </div>
+            </div>
+            <div class="raw-input-actions">
+              <button class="primary-button" type="submit">登记老人</button>
+            </div>
+          </form>
+          <div class="feedback-status" id="elderRegisterStatus" aria-live="polite"></div>
+        </div>
+
+        <div class="admin-subsection">
+          <h3>原始资料录入</h3>
+          <form class="raw-input-form" id="rawInputForm">
+            <div class="raw-input-grid">
+              <div class="raw-input-field">
+                <label for="rawInputElder">老人</label>
+                <select id="rawInputElder" required></select>
+              </div>
+              <div class="raw-input-field">
+                <label for="rawInputSourceType">来源</label>
+                <select id="rawInputSourceType">
+                  <option value="family">家属</option>
+                  <option value="caregiver">护工</option>
+                  <option value="nurse">护士</option>
+                  <option value="doctor">医生</option>
+                  <option value="institution">机构记录</option>
+                  <option value="admin">管理员</option>
+                </select>
+              </div>
+              <div class="raw-input-field">
+                <label for="rawInputSourceName">提供人</label>
+                <input id="rawInputSourceName" placeholder="女儿周敏" value="管理员" />
+              </div>
+              <div class="raw-input-field">
+                <label for="rawInputConfidence">可信度</label>
+                <select id="rawInputConfidence">
+                  <option value="medium">中</option>
+                  <option value="high">高</option>
+                  <option value="low">低</option>
+                </select>
+              </div>
+              <div class="raw-input-field raw-input-wide">
+                <label for="rawInputTags">标签</label>
+                <input id="rawInputTags" placeholder="进食偏好、情绪安抚" />
+              </div>
+              <div class="raw-input-field raw-input-wide">
+                <label for="rawInputContent">资料内容</label>
+                <textarea id="rawInputContent" required placeholder="吃午饭喜欢坐靠窗左侧，先放沪剧，不催第一口。"></textarea>
+              </div>
+            </div>
+            <div class="raw-input-actions">
+              <button class="primary-button" type="submit">保存资料</button>
+            </div>
+          </form>
+          <div class="feedback-status" id="rawInputStatus" aria-live="polite"></div>
+          <div class="raw-input-list" id="rawInputList"></div>
+        </div>
+      </section>
+
       <section class="admin-roster-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>老人照护认知总览</h2>
-            <p>一位老人一块信息，管理员可以快速看见建议、故事、经验和待确认事项。</p>
+            <h2>老人总览</h2>
           </div>
-          <span class="tag success">按老人管理</span>
+          <span class="tag success">按老人</span>
         </div>
         <div class="admin-roster" id="adminElderRoster"></div>
       </section>
@@ -4458,7 +4716,7 @@
       <div class="caregiver-drawer-head">
         <div>
           <h2 class="caregiver-drawer-title" id="handoverTitle">交接班</h2>
-          <p class="caregiver-drawer-subtitle">说一句关键情况，系统先帮你记下。</p>
+          <p class="caregiver-drawer-subtitle">交接一句话</p>
         </div>
         <button class="drawer-close-button" type="button" id="closeHandoverDrawer" aria-label="关闭交接班">×</button>
       </div>
@@ -4721,6 +4979,10 @@
       pendingConfirmations: [],
       familyStoryInputs: [],
       carePhotos: [],
+      rawInputs: [],
+      rawInputSaving: false,
+      rawInputParsingId: "",
+      elderSaving: false,
       summaryRunning: false,
       profileGenerating: false,
       profileNotice: "",
@@ -4744,6 +5006,16 @@
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     const API_BASES = [
       window.CAREACTION_API_BASE,
       (location.protocol === "http:" || location.protocol === "https:") ? location.origin : "",
@@ -4799,6 +5071,7 @@
           state.pendingConfirmations = data.pending_confirmations || [];
           state.familyStoryInputs = data.family_story_inputs || [];
           state.carePhotos = data.care_photos || [];
+          state.rawInputs = data.raw_inputs || [];
           if (!tasks.some((task) => task.id === state.selectedTaskId)) {
             state.selectedTaskId = tasks[0]?.id || state.selectedTaskId;
           }
@@ -4969,9 +5242,224 @@
       ].slice(0, 6);
     }
 
+    function rawInputSourceLabel(value) {
+      return {
+        family: "家属",
+        caregiver: "护工",
+        nurse: "护士",
+        doctor: "医生",
+        institution: "机构记录",
+        admin: "管理员"
+      }[value] || value || "未知来源";
+    }
+
+    function rawInputStatusMeta(value) {
+      if (value === "pending_ai_parse") return { text: "待AI整理", className: "warning" };
+      if (value === "parsed_pending_confirmation") return { text: "已整理待确认", className: "success" };
+      if (value === "confirmed") return { text: "已确认", className: "success" };
+      if (value === "rejected") return { text: "已否认", className: "danger" };
+      return { text: "已保存", className: "status" };
+    }
+
+    function renderRawInputElderOptions() {
+      const select = $("#rawInputElder");
+      if (!select) return;
+      const previous = select.value || currentTask()?.elderId || Object.keys(elders || {})[0];
+      select.innerHTML = Object.values(elders || {}).map((elder) => (
+        `<option value="${escapeHtml(elder.id)}">${escapeHtml(elder.name)} · ${escapeHtml(elder.room)}房</option>`
+      )).join("");
+      if (previous && Object.prototype.hasOwnProperty.call(elders, previous)) {
+        select.value = previous;
+      }
+    }
+
+    function renderRawInputsPanel() {
+      renderRawInputElderOptions();
+      const list = $("#rawInputList");
+      if (!list) return;
+      const recent = (state.rawInputs || []).slice(0, 8);
+      if (!recent.length) {
+        list.innerHTML = `
+          <article class="raw-input-item">
+            <div>
+              <h3>暂无资料</h3>
+            </div>
+          </article>
+        `;
+        return;
+      }
+      list.innerHTML = recent.map((item) => {
+        const elder = elders[item.elder_id] || { name: item.elder_id || "未知老人", room: "" };
+        const status = rawInputStatusMeta(item.status);
+        const tags = Array.isArray(item.tags) ? item.tags : [];
+        const result = item.ai_result || {};
+        const parsedText = result.summary ? `AI摘要：${result.summary}` : "待整理";
+        const isParsing = String(state.rawInputParsingId) === String(item.id);
+        const canParse = item.status !== "parsed_pending_confirmation";
+        return `
+          <article class="raw-input-item">
+            <div>
+              <h3>${escapeHtml(elder.name)} ${elder.room ? `· ${escapeHtml(elder.room)}房` : ""}</h3>
+              <p>${escapeHtml(item.content)}</p>
+              <p>${escapeHtml(parsedText)}</p>
+              <div class="raw-input-meta">
+                <span class="tag ${status.className}">${status.text}</span>
+                <span class="tag status">${escapeHtml(rawInputSourceLabel(item.source_type))} · ${escapeHtml(item.source_name)}</span>
+                <span class="tag status">可信度：${escapeHtml(item.confidence)}</span>
+                ${tags.map((tag) => `<span class="tag success">${escapeHtml(tag)}</span>`).join("")}
+              </div>
+            </div>
+            <button class="raw-input-parse" type="button" data-parse-raw-id="${escapeHtml(item.id)}" ${canParse && !isParsing ? "" : "disabled"}>
+              ${isParsing ? "整理中..." : (canParse ? "AI整理" : "已整理")}
+            </button>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function listFromInput(selector) {
+      const value = $(selector)?.value || "";
+      return value
+        .split(/[，,、;；]+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    async function submitElderRegistration() {
+      const status = $("#elderRegisterStatus");
+      const name = $("#elderNameInput").value.trim();
+      const room = $("#elderRoomInput").value.trim();
+      const age = Number($("#elderAgeInput").value);
+      if (!name || !room || !Number.isFinite(age)) return;
+      const payload = {
+        name,
+        room,
+        age,
+        status: $("#elderStatusInput").value.trim() || "待评估",
+        contact: $("#elderContactInput").value.trim() || "待补充",
+        mobility: $("#elderMobilityInput").value.trim() || "待补充",
+        diet: $("#elderDietInput").value.trim() || "待补充",
+        preference_tags: listFromInput("#elderPreferenceInput"),
+        avoid_tags: listFromInput("#elderAvoidInput"),
+        family_summary: listFromInput("#elderFamilySummaryInput"),
+        note: $("#elderNoteInput").value.trim()
+      };
+      state.elderSaving = true;
+      status.className = "feedback-status show";
+      status.textContent = "正在登记...";
+      let registeredId = "";
+      try {
+        const result = await apiRequest("/api/elders", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          timeoutMs: 9000
+        });
+        if (result.elder) {
+          elders[result.elder.id] = result.elder;
+          registeredId = result.elder.id;
+        }
+        $("#elderRegisterForm").reset();
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        status.className = "feedback-status show success";
+        status.textContent = "已登记。";
+        renderAdminPanel();
+        if (registeredId && $("#rawInputElder")) $("#rawInputElder").value = registeredId;
+        updateSyncUI();
+      } catch (error) {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        status.className = "feedback-status show warning";
+        status.textContent = "登记失败。";
+        updateSyncUI();
+        console.warn("老人登记失败。", error);
+      } finally {
+        state.elderSaving = false;
+      }
+    }
+
+    async function submitRawInput() {
+      const status = $("#rawInputStatus");
+      const content = $("#rawInputContent").value.trim();
+      if (!content) return;
+      const tags = listFromInput("#rawInputTags");
+      const payload = {
+        elder_id: $("#rawInputElder").value,
+        source_type: $("#rawInputSourceType").value,
+        source_name: $("#rawInputSourceName").value.trim() || rawInputSourceLabel($("#rawInputSourceType").value),
+        content_type: "text",
+        content,
+        tags,
+        confidence: $("#rawInputConfidence").value
+      };
+      state.rawInputSaving = true;
+      status.className = "feedback-status show";
+      status.textContent = "正在保存到数据库...";
+      try {
+        const result = await apiRequest("/api/raw-inputs", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          timeoutMs: 9000
+        });
+        if (result.raw_input) {
+          state.rawInputs = [result.raw_input, ...state.rawInputs].slice(0, 120);
+        }
+        $("#rawInputContent").value = "";
+        $("#rawInputTags").value = "";
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        status.className = "feedback-status show success";
+        status.textContent = "已保存。下一步可点击“AI整理”。";
+        renderRawInputsPanel();
+        updateSyncUI();
+      } catch (error) {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        status.className = "feedback-status show warning";
+        status.textContent = "保存失败。";
+        updateSyncUI();
+        console.warn("原始资料未保存。", error);
+      } finally {
+        state.rawInputSaving = false;
+      }
+    }
+
+    async function parseRawInput(rawInputId) {
+      const status = $("#rawInputStatus");
+      state.rawInputParsingId = String(rawInputId);
+      status.className = "feedback-status show";
+      status.textContent = "正在整理为故事书、经验库和待确认信息...";
+      renderRawInputsPanel();
+      try {
+        const result = await apiRequest(`/api/raw-inputs/${encodeURIComponent(rawInputId)}/parse`, {
+          method: "POST",
+          timeoutMs: 15000
+        });
+        const saved = result.saved || {};
+        const savedCount = (saved.story_cards || []).length + (saved.care_experiences || []).length + (saved.pending_confirmations || []).length;
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        status.className = "feedback-status show success";
+        status.textContent = `已整理，生成 ${savedCount || 3} 条后台资料，等待人工确认。`;
+        await loadFromBackend();
+        updateSyncUI();
+      } catch (error) {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        status.className = "feedback-status show warning";
+        status.textContent = "整理失败。";
+        updateSyncUI();
+        console.warn("原始资料整理失败。", error);
+      } finally {
+        state.rawInputParsingId = "";
+        renderRawInputsPanel();
+      }
+    }
+
     function renderAdminPanel() {
       const roster = $("#adminElderRoster");
       if (!roster) return;
+      renderRawInputsPanel();
       const activePending = (state.pendingConfirmations || []).filter((item) => item.status === "pending");
       const suggestions = Object.values(state.taskSuggestions || {});
       if ($("#adminStoryCount")) $("#adminStoryCount").textContent = state.lifeStoryCards.length;
@@ -5480,7 +5968,6 @@
 
     function renderWhy() {
       const task = currentTask();
-      $("#whyIntro").textContent = `建议：${task.actionTitle}`;
       const enough = task.confidence >= 60 && task.evidence.length >= 3;
       $("#whyConfidenceTag").textContent = enough ? "够用" : "不足";
       $("#whyConfidenceTag").className = `tag ${enough ? "success" : "warning"}`;
@@ -5514,7 +6001,7 @@
       $$(".quick-chip[data-observation]").forEach((button) => {
         button.classList.toggle("active", state.selectedObservations.includes(button.dataset.observation));
       });
-      $("#voiceNoteText").textContent = state.voiceNote || "可不说。要说就点左边。";
+      $("#voiceNoteText").textContent = state.voiceNote || "未录音";
     }
 
     function renderAiProfile() {
@@ -5527,8 +6014,8 @@
       button.textContent = state.profileGenerating ? "生成中" : "生成";
 
       if (!profile) {
-        $("#aiProfileSource").textContent = state.apiOnline ? "可生成。" : "需连接后端。";
-        $("#aiProfileSummary").textContent = "点生成，AI 会看记录。";
+        $("#aiProfileSource").textContent = state.apiOnline ? "可生成" : "离线";
+        $("#aiProfileSummary").textContent = "未生成。";
         $("#aiRiskTags").innerHTML = "";
         $("#aiProfileTips").innerHTML = "";
         status.className = `feedback-status ${state.profileNotice ? "show pending" : ""}`;
@@ -5731,7 +6218,7 @@
       button.disabled = true;
       button.textContent = "汇总中";
       status.className = "feedback-status show pending";
-      status.textContent = "正在整理人生故事书、经验库和任务建议。";
+      status.textContent = "汇总中...";
       try {
         const result = await apiRequest("/api/daily-summary", {
           method: "POST",
@@ -5782,7 +6269,7 @@
         state.apiOnline = true;
         state.weakNetwork = false;
         status.className = "feedback-status show success";
-        status.textContent = "已提交，下一次每日汇总会整理。";
+        status.textContent = "已提交。";
       } catch (error) {
         state.apiOnline = false;
         state.weakNetwork = true;
@@ -5998,6 +6485,22 @@
 
     $("#dailySummaryButton").addEventListener("click", () => {
       runDailySummary();
+    });
+
+    $("#elderRegisterForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      submitElderRegistration();
+    });
+
+    $("#rawInputForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      submitRawInput();
+    });
+
+    $("#rawInputList").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-parse-raw-id]");
+      if (!button || button.disabled) return;
+      parseRawInput(button.dataset.parseRawId);
     });
 
     $$("[data-login-role]").forEach((button) => {

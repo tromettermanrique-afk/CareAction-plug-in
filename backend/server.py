@@ -814,6 +814,103 @@ def get_elders(conn):
     return result
 
 
+def list_from_payload(value, fallback=None, max_items=12):
+    if isinstance(value, list):
+        source = value
+    else:
+        source = (
+            str(value or "")
+            .replace("，", ",")
+            .replace("、", ",")
+            .replace("；", ",")
+            .replace(";", ",")
+            .split(",")
+        )
+    items = [str(item).strip() for item in source if str(item).strip()]
+    return (items[:max_items] or (fallback or []))[:max_items]
+
+
+def unique_elder_id(conn, proposed):
+    base = "".join(
+        char.lower() if char.isascii() and char.isalnum() else "_"
+        for char in str(proposed or "")
+    ).strip("_")
+    if not base:
+        base = f"elder_{dt.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    base = base[:36]
+    candidate = base
+    suffix = 2
+    while conn.execute("SELECT id FROM elders WHERE id = ?", (candidate,)).fetchone():
+        candidate = f"{base[:30]}_{suffix}"
+        suffix += 1
+    return candidate
+
+
+def create_elder(conn, payload):
+    name = str(payload.get("name") or "").strip()
+    room = str(payload.get("room") or "").strip()
+    if not name:
+        raise ValueError("name required")
+    if not room:
+        raise ValueError("room required")
+    try:
+        age = int(payload.get("age") or 0)
+    except (TypeError, ValueError):
+        raise ValueError("age invalid")
+    if age < 0 or age > 120:
+        raise ValueError("age invalid")
+
+    initial = str(payload.get("initial") or name[:1]).strip()[:2] or "新"
+    status = str(payload.get("status") or "待评估").strip()[:80]
+    contact = str(payload.get("contact") or "待补充").strip()[:80]
+    mobility = str(payload.get("mobility") or "待补充").strip()[:120]
+    diet = str(payload.get("diet") or "待补充").strip()[:120]
+    preference_tags = list_from_payload(payload.get("preference_tags") or payload.get("preferenceTags"))
+    avoid_tags = list_from_payload(payload.get("avoid_tags") or payload.get("avoidTags"))
+    family_summary = list_from_payload(payload.get("family_summary") or payload.get("familySummary"), max_items=6)
+    note = str(payload.get("note") or "").strip()
+    if note and not family_summary:
+        family_summary = [note[:120]]
+
+    elder_id = unique_elder_id(conn, payload.get("id") or f"{room}_{name}")
+    conn.execute(
+        """
+        INSERT INTO elders (
+          id, name, initial, age, room, status, contact, mobility, diet,
+          preference_tags, avoid_tags, family_summary
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            elder_id,
+            name,
+            initial,
+            age,
+            room,
+            status,
+            contact,
+            mobility,
+            diet,
+            encode(preference_tags),
+            encode(avoid_tags),
+            encode(family_summary),
+        ),
+    )
+    now = dt.datetime.now().isoformat(timespec="seconds")
+    if note:
+        conn.execute(
+            """
+            INSERT INTO observations (elder_id, time_label, title, text, tag, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (elder_id, "入院", "入院备注", note[:500], "登记", now),
+        )
+    row = conn.execute("SELECT * FROM elders WHERE id = ?", (elder_id,)).fetchone()
+    observations = []
+    if note:
+        observations = [{"time": "入院", "title": "入院备注", "text": note[:500], "tag": "登记"}]
+    return elder_from_row(row, observations)
+
+
 def get_tasks(conn):
     rows = conn.execute("SELECT * FROM tasks ORDER BY time_label").fetchall()
     result = []
@@ -1982,6 +2079,12 @@ class CareActionHandler(BaseHTTPRequestHandler):
                     item = create_feedback(conn, payload)
                     conn.commit()
                 return self.send_json({"ok": True, "feedback": item}, status=201)
+            if parsed.path == "/api/elders":
+                payload = self.read_json()
+                with connect() as conn:
+                    elder = create_elder(conn, payload)
+                    conn.commit()
+                return self.send_json({"ok": True, "elder": elder}, status=201)
             if parsed.path == "/api/raw-inputs":
                 payload = self.read_json()
                 with connect() as conn:
