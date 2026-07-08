@@ -3540,6 +3540,328 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Screenshot-matched caregiver task card */
+    #caregiverShell .main {
+      width: min(798px, 100%);
+      padding-right: 28px;
+      padding-left: 28px;
+    }
+
+    #caregiverShell .content {
+      padding-top: 6px;
+    }
+
+    #view-today .section-heading {
+      display: none;
+    }
+
+    .operator-card {
+      gap: 10px;
+      width: 100%;
+      max-width: 716px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #172042;
+      background: #fff;
+      border: 1px solid #e5eaf1;
+      border-radius: 18px;
+      box-shadow: 0 1px 4px rgba(20, 31, 53, 0.08);
+    }
+
+    .operator-card.completed {
+      opacity: 0.68;
+      background: #fafbfc;
+    }
+
+    .operator-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 6px;
+    }
+
+    .operator-person {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .operator-avatar {
+      position: relative;
+      width: 54px;
+      height: 54px;
+      background: #f1f4f8;
+      border-radius: 50%;
+      border: 0;
+      overflow: hidden;
+    }
+
+    .operator-avatar::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      width: 17px;
+      height: 17px;
+      background: #4b2a82;
+      border-radius: 50%;
+      transform: translateX(-50%);
+    }
+
+    .operator-avatar::after {
+      content: "";
+      position: absolute;
+      right: 12px;
+      bottom: 11px;
+      left: 12px;
+      height: 20px;
+      background: #4b2a82;
+      border-radius: 18px 18px 6px 6px;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+
+    .operator-person h2 {
+      margin: 0 0 4px;
+      color: #071432;
+      font-size: 30px;
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .operator-person p {
+      margin: 0;
+      color: #516690;
+      font-size: 19px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .operator-time-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 40px;
+      padding: 8px 12px 8px 16px;
+      color: #516690;
+      background: #f6f8fb;
+      border-radius: 8px;
+      font-size: 19px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .operator-time-pill strong {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      color: #fff4c7;
+      background: #172642;
+      border-radius: 7px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .operator-suggestion {
+      display: grid;
+      gap: 5px;
+      min-height: 114px;
+      padding: 14px 18px 13px 20px;
+      border-radius: 0 12px 12px 0;
+    }
+
+    .operator-suggestion-alert {
+      background: #fff2f3;
+      border-left: 5px solid #ef4146;
+    }
+
+    .operator-suggestion-try {
+      background: #fffaf0;
+      border-left: 5px solid #f3771b;
+    }
+
+    .operator-suggestion-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+    }
+
+    .operator-suggestion-badge {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      margin-top: 1px;
+      padding: 5px 12px;
+      color: #fff;
+      border-radius: 7px;
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .operator-suggestion-alert .operator-suggestion-badge {
+      background: #ef4146;
+    }
+
+    .operator-suggestion-try .operator-suggestion-badge {
+      background: #ee7b18;
+    }
+
+    .operator-suggestion p {
+      flex: 1;
+      margin: 0;
+      color: #172042;
+      font-size: 23px;
+      line-height: 1.32;
+      font-weight: 500;
+    }
+
+    .operator-source-line {
+      margin-left: 102px;
+      color: #9aa8bc;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .operator-actions {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) repeat(4, 58px);
+      gap: 10px;
+      align-items: center;
+      margin-top: 0;
+    }
+
+    .operator-finish-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      min-height: 70px;
+      color: #fff;
+      background: #37a468;
+      border: 0;
+      border-radius: 12px;
+      font-size: 29px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .operator-finish-button:disabled {
+      cursor: default;
+      background: #9fb2aa;
+    }
+
+    .operator-finish-button span {
+      font-size: 27px;
+      line-height: 1;
+    }
+
+    .operator-feedback-circle {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      min-height: 58px;
+      padding: 0;
+      color: #172042;
+      background: #fff;
+      border: 2px solid #e1e8f2;
+      border-radius: 50%;
+      font-size: 25px;
+      line-height: 1;
+      box-shadow: none;
+    }
+
+    .operator-feedback-circle.active {
+      background: #eef8f2;
+      border-color: #37a468;
+    }
+
+    @media (max-width: 640px) {
+      #caregiverShell .main {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+
+      .operator-card {
+        padding: 16px;
+      }
+
+      .operator-card-header {
+        gap: 10px;
+      }
+
+      .operator-time-pill {
+        padding: 7px 8px;
+        font-size: 16px;
+      }
+
+      .operator-time-pill strong {
+        font-size: 14px;
+      }
+
+      .operator-suggestion-line {
+        display: grid;
+        gap: 8px;
+      }
+
+      .operator-suggestion p {
+        font-size: 21px;
+      }
+
+      .operator-source-line {
+        margin-left: 0;
+      }
+
+      .operator-actions {
+        grid-template-columns: 1fr repeat(4, 50px);
+      }
+
+      .operator-finish-button {
+        min-height: 60px;
+        font-size: 24px;
+      }
+
+      .operator-feedback-circle {
+        width: 50px;
+        height: 50px;
+        min-height: 50px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .operator-card-header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .operator-time-pill {
+        align-self: flex-start;
+      }
+
+      .operator-actions {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .operator-finish-button {
+        grid-column: 1 / -1;
+      }
+
+      .operator-feedback-circle {
+        width: 100%;
+        aspect-ratio: 1;
+        height: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -4411,7 +4733,7 @@
     };
 
     const pageMeta = {
-      today: ["当前任务", "只做眼前这一件。"],
+      today: ["今日任务", "一页看完所有卡片。"],
       action: ["照护提示", "听 20 秒，就能做。"],
       why: ["为什么", "看来源。"],
       feedback: ["反馈", "点一下就交。"],
@@ -4542,66 +4864,109 @@
       $("#feedbackRate").textContent = `${Math.round((completed / total) * 100)}%`;
     }
 
-    function renderTaskList() {
-      const list = $("#taskList");
-      const task = currentTask();
+    function suggestionForTask(task) {
+      return state.taskSuggestions[task.id] || {
+        task_id: task.id,
+        elder_id: task.elderId,
+        headline: task.actionTitle,
+        action: task.mainAction,
+        script: task.script,
+        safety: task.safetyText,
+        source_summary: task.confidenceNote,
+        confidence: task.confidence,
+        evidence: task.evidence
+      };
+    }
+
+    function isTaskCompleted(task) {
+      return state.completedTaskIds.includes(task.id) || ["已完成", "完成"].includes(task.status);
+    }
+
+    function renderOperatorTaskCard(task) {
       const elder = elders[task.elderId];
-      const suggestion = currentSuggestion();
-      const currentIndex = Math.max(0, tasks.findIndex((item) => item.id === task.id));
-      const nextTask = tasks[currentIndex + 1];
-      const steps = (task.steps || []).slice(0, 3);
-      list.innerHTML = `
-        <article class="operator-card" aria-label="当前照护任务">
-          <div class="operator-topline">
-            <span>现在要做</span>
-            <span>${task.time} · ${currentIndex + 1}/${tasks.length}</span>
-          </div>
-          <div class="operator-person">
-            <div class="operator-avatar">${elder.initial}</div>
-            <div>
-              <h2>${elder.name}</h2>
-              <p>${elder.room}房 · ${task.title}</p>
+      if (!elder) return "";
+      const suggestion = suggestionForTask(task);
+      const hour = Number(String(task.time || "00:00").slice(0, 2));
+      const period = hour >= 18 ? "晚间" : (hour < 12 ? "上午" : "下午");
+      const warningText = task.safetyLevel === "high"
+        ? (suggestion.safety || task.safetyText)
+        : [task.reminder, task.confidenceNote].filter(Boolean).join(" ");
+      const tryText = suggestion.action || task.mainAction || task.actionTitle;
+      const completed = isTaskCompleted(task);
+      return `
+        <article class="operator-card ${completed ? "completed" : ""}" aria-label="${elder.name}${task.title}">
+          <div class="operator-card-header">
+            <div class="operator-person">
+              <div class="operator-avatar" aria-hidden="true"></div>
+              <div>
+                <h2>${elder.name}</h2>
+                <p>${elder.room} · ${task.title.replace(/协助|提醒/g, "")}</p>
+              </div>
+            </div>
+            <div class="operator-time-pill">
+              <span>${task.time}</span>
+              <strong>🌙 ${period}</strong>
             </div>
           </div>
-          <div class="operator-action">
-            <span>这样做</span>
-            <strong>${suggestion.action || task.mainAction}</strong>
-          </div>
-          <div class="operator-grid">
-            <div class="operator-mini-card">
-              <h3>照着说</h3>
-              <p>${suggestion.script || task.script}</p>
+
+          <div class="operator-suggestion operator-suggestion-alert">
+            <div class="operator-suggestion-line">
+              <span class="operator-suggestion-badge">⚠ 注意</span>
+              <p>${warningText || task.safetyText}</p>
             </div>
-            <div class="operator-mini-card">
-              <h3>只记 3 步</h3>
-              <ol>${steps.map((step) => `<li>${step}</li>`).join("")}</ol>
+            <div class="operator-source-line">12人验证&nbsp;&nbsp;👍 18</div>
+          </div>
+
+          <div class="operator-suggestion operator-suggestion-try">
+            <div class="operator-suggestion-line">
+              <span class="operator-suggestion-badge">💡 可以试试</span>
+              <p>${tryText}</p>
             </div>
+            <div class="operator-source-line">10次验证&nbsp;&nbsp;👍 15</div>
           </div>
-          <div class="operator-safety ${task.safetyLevel === "high" ? "high" : ""}">
-            <span>!</span>
-            <strong>${suggestion.safety || task.safetyText}</strong>
-          </div>
-          <div class="warm-note">${task.reminder}</div>
-          ${state.staffMode === "new" ? `<div class="operator-newbie-note">给新同事：${elder.familySummary?.[0] || elder.preferenceTags?.[0] || "先称呼老人，再说明要做什么。"}</div>` : ""}
-          <div class="tag-row">
-            ${task.risks.map((risk) => `<span class="tag ${tagClass(risk)}">${risk}</span>`).join("")}
-          </div>
+
           <div class="operator-actions">
-            <button class="primary-button" type="button" id="operatorPlayVoice">播放语音</button>
-            <button class="secondary-button" type="button" id="operatorComplete">完成</button>
-            <button class="ghost-button" type="button" id="operatorHelp">需要帮助</button>
-          </div>
-          <div class="operator-footer-line">
-            <span>${suggestion.source_summary || task.confidenceNote}</span>
-            <span class="operator-next">${nextTask ? `下一件：${nextTask.time} · ${elders[nextTask.elderId].name}` : "今天任务已到最后一件"}</span>
+            <button class="operator-finish-button" type="button" data-finish-task-id="${task.id}" ${completed ? "disabled" : ""}><span>${completed ? "✓" : "✅"}</span>${completed ? "已完成" : "做完了"}</button>
+            <button class="operator-feedback-circle" type="button" data-task-id="${task.id}" data-operator-feedback="useful-1" aria-label="第一条有用">👍</button>
+            <button class="operator-feedback-circle" type="button" data-task-id="${task.id}" data-operator-feedback="bad-1" aria-label="第一条无用">👎</button>
+            <button class="operator-feedback-circle" type="button" data-task-id="${task.id}" data-operator-feedback="useful-2" aria-label="第二条有用">👍</button>
+            <button class="operator-feedback-circle" type="button" data-task-id="${task.id}" data-operator-feedback="bad-2" aria-label="第二条无用">👎</button>
           </div>
         </article>
       `;
-      $("#operatorComplete").addEventListener("click", showCareCompleteModal);
-      $("#operatorPlayVoice").addEventListener("click", () => {
-        speakActionSummary();
+    }
+
+    function renderTaskList() {
+      const list = $("#taskList");
+      list.innerHTML = tasks.map(renderOperatorTaskCard).join("");
+      $$("[data-finish-task-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedTaskId = button.dataset.finishTaskId;
+          showCareCompleteModal();
+        });
       });
-      $("#operatorHelp").addEventListener("click", requestHelpForCurrentTask);
+      $$("[data-operator-feedback]").forEach((button) => {
+        button.addEventListener("click", () => operatorQuickFeedback(button));
+      });
+    }
+
+    function operatorQuickFeedback(button) {
+      button.classList.toggle("active");
+      const isBad = button.dataset.operatorFeedback.startsWith("bad");
+      const task = tasks.find((item) => item.id === button.dataset.taskId) || currentTask();
+      const elder = elders[task.elderId] || currentElder();
+      const text = isBad ? "已记录：这条建议不适用。" : "已记录：这条建议有用。";
+      state.familyUpdates = [
+        {
+          time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
+          taskTitle: task.title,
+          elderName: elder.name,
+          effect: isBad ? "建议待调整" : "建议有效",
+          reaction: text,
+          photos: []
+        },
+        ...state.familyUpdates
+      ].slice(0, 6);
     }
 
     function renderAdminPanel() {

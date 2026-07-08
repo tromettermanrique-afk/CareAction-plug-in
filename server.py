@@ -38,6 +38,7 @@ INSERT_ID_TABLES = {
     "PENDING_CONFIRMATIONS",
     "FAMILY_STORY_INPUTS",
     "CARE_PHOTOS",
+    "RAW_INPUTS",
 }
 
 
@@ -511,6 +512,23 @@ def init_db():
               visible_to_family INTEGER NOT NULL DEFAULT 1,
               FOREIGN KEY (elder_id) REFERENCES elders(id),
               FOREIGN KEY (task_id) REFERENCES tasks(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS raw_inputs (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              elder_id TEXT NOT NULL,
+              source_type TEXT NOT NULL,
+              source_name TEXT NOT NULL,
+              content_type TEXT NOT NULL,
+              content TEXT NOT NULL,
+              occurred_at TEXT NOT NULL,
+              tags TEXT NOT NULL,
+              confidence TEXT NOT NULL,
+              status TEXT NOT NULL,
+              ai_result TEXT NOT NULL DEFAULT '',
+              created_at TEXT NOT NULL,
+              parsed_at TEXT NOT NULL DEFAULT '',
+              FOREIGN KEY (elder_id) REFERENCES elders(id)
             );
             """
         )
@@ -1081,6 +1099,68 @@ def get_care_photos(conn, elder_id=None):
     ]
 
 
+def raw_input_from_row(row):
+    return {
+        "id": row["id"],
+        "elder_id": row["elder_id"],
+        "source_type": row["source_type"],
+        "source_name": row["source_name"],
+        "content_type": row["content_type"],
+        "content": row["content"],
+        "occurred_at": row["occurred_at"],
+        "tags": decode(row["tags"], []),
+        "confidence": row["confidence"],
+        "status": row["status"],
+        "ai_result": decode(row["ai_result"], {}) if row["ai_result"] else {},
+        "created_at": row["created_at"],
+        "parsed_at": row["parsed_at"],
+    }
+
+
+def get_raw_inputs(conn, elder_id=None, status=None, limit=100):
+    limit = max(1, min(int(limit or 100), 200))
+    if elder_id and status:
+        rows = conn.execute(
+            """
+            SELECT * FROM raw_inputs
+            WHERE elder_id = ? AND status = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (elder_id, status, limit),
+        ).fetchall()
+    elif elder_id:
+        rows = conn.execute(
+            """
+            SELECT * FROM raw_inputs
+            WHERE elder_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (elder_id, limit),
+        ).fetchall()
+    elif status:
+        rows = conn.execute(
+            """
+            SELECT * FROM raw_inputs
+            WHERE status = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (status, limit),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """
+            SELECT * FROM raw_inputs
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+    return [raw_input_from_row(row) for row in rows]
+
+
 def suggestion_for_task(task, suggestion=None):
     if not suggestion:
         return {
@@ -1124,10 +1204,12 @@ def gather_profile_context(conn, elder_id):
     task_ids = {task["id"] for task in tasks_for_elder}
     feedback = [item for item in get_feedback(conn) if item["elder_id"] == elder_id or item["task_id"] in task_ids]
     external_records = fetch_external_records(elder_id)
+    raw_inputs = get_raw_inputs(conn, elder_id=elder_id, limit=50)
     return {
         "elder": elder,
         "tasks": tasks_for_elder,
         "feedback": feedback[:20],
+        "raw_inputs": raw_inputs,
         "external_records": external_records[:50],
     }
 
@@ -1137,6 +1219,7 @@ def gather_daily_summary_context(conn):
         "elders": get_elders(conn),
         "tasks": get_tasks(conn),
         "feedback": get_feedback(conn)[:80],
+        "raw_inputs": get_raw_inputs(conn, limit=120),
         "family_inputs": get_family_story_inputs(conn)[:80],
         "life_story_cards": get_life_story_cards(conn)[:100],
         "care_experiences": get_care_experiences(conn)[:100],
@@ -1520,6 +1603,227 @@ def create_feedback(conn, payload):
     }
 
 
+def create_raw_input(conn, payload):
+    elder_id = str(payload.get("elder_id") or "").strip()
+    if not elder_id:
+        raise ValueError("elder_id required")
+    elder = conn.execute("SELECT id FROM elders WHERE id = ?", (elder_id,)).fetchone()
+    if not elder:
+        raise ValueError("elder_id not found")
+
+    source_type = str(payload.get("source_type") or "admin").strip()[:40]
+    source_name = str(payload.get("source_name") or "").strip()[:80]
+    content_type = str(payload.get("content_type") or "text").strip()[:40]
+    content = str(payload.get("content") or "").strip()
+    if not content:
+        raise ValueError("content required")
+    if len(content) > 6000:
+        raise ValueError("content too long")
+
+    tags = payload.get("tags") or []
+    if not isinstance(tags, list):
+        tags = [str(tags)]
+    tags = [str(tag).strip() for tag in tags if str(tag).strip()][:12]
+
+    confidence = str(payload.get("confidence") or "medium").strip()[:20]
+    occurred_at = str(payload.get("occurred_at") or "").strip()
+    now = dt.datetime.now()
+    created_at = now.isoformat(timespec="seconds")
+    if not occurred_at:
+        occurred_at = created_at
+
+    cur = conn.execute(
+        """
+        INSERT INTO raw_inputs (
+          elder_id, source_type, source_name, content_type, content, occurred_at,
+          tags, confidence, status, ai_result, created_at, parsed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            elder_id,
+            source_type,
+            source_name,
+            content_type,
+            content,
+            occurred_at,
+            encode(tags),
+            confidence,
+            "pending_ai_parse",
+            "",
+            created_at,
+            "",
+        ),
+    )
+    return {
+        "id": cur.lastrowid,
+        "elder_id": elder_id,
+        "source_type": source_type,
+        "source_name": source_name,
+        "content_type": content_type,
+        "content": content,
+        "occurred_at": occurred_at,
+        "tags": tags,
+        "confidence": confidence,
+        "status": "pending_ai_parse",
+        "ai_result": {},
+        "created_at": created_at,
+        "parsed_at": "",
+    }
+
+
+def infer_raw_input_task_type(content, tags):
+    text = content + " " + " ".join(tags)
+    rules = [
+        ("进食", ["吃", "饭", "粥", "餐", "吞咽", "呛", "喝"]),
+        ("洗漱", ["洗", "脸", "澡", "口腔", "牙", "擦身"]),
+        ("如厕", ["厕所", "如厕", "小便", "大便", "二便"]),
+        ("翻身", ["翻身", "褥疮", "压疮", "减压", "卧床"]),
+        ("服药", ["药", "服药", "医嘱", "吗啡", "降糖"]),
+        ("活动", ["散步", "活动", "下棋", "听", "音乐", "沪剧"]),
+        ("情绪安抚", ["焦虑", "抗拒", "情绪", "生气", "哭", "配合"]),
+    ]
+    for task_type, keywords in rules:
+        if any(keyword in text for keyword in keywords):
+            return task_type
+    return "日常照护"
+
+
+def parse_raw_input(conn, raw_input_id):
+    row = conn.execute("SELECT * FROM raw_inputs WHERE id = ?", (raw_input_id,)).fetchone()
+    if not row:
+        raise ValueError("raw input not found")
+    raw = raw_input_from_row(row)
+    content = raw["content"]
+    tags = raw["tags"]
+    task_type = infer_raw_input_task_type(content, tags)
+    summary = content[:42] + ("…" if len(content) > 42 else "")
+    has_risk = any(
+        keyword in content
+        for keyword in ["药", "吗啡", "急救", "跌倒", "吞咽", "呛咳", "约束", "出血", "发热", "体温", "疼痛", "医嘱"]
+    )
+    safety = "涉及医疗、用药、急救、跌倒、吞咽异常时，必须遵循机构流程并通知护士/医生。" if has_risk else "这只是个性化照护提醒，不替代专业医疗判断。"
+    source = raw["source_name"] or raw["source_type"]
+    now = dt.datetime.now().isoformat(timespec="seconds")
+
+    result = {
+        "summary": summary,
+        "risk_level": "high" if has_risk else "normal",
+        "task_type": task_type,
+        "life_story_cards": [
+            {
+                "elder_id": raw["elder_id"],
+                "section": "原始资料整理",
+                "title": tags[0] if tags else f"{task_type}线索",
+                "content": content,
+                "care_meaning": f"后续{task_type}任务可参考这条信息，但需要人工确认。",
+                "confidence": raw["confidence"],
+                "status": "pending",
+                "evidence": [{"source": source, "raw_input_id": raw_input_id, "occurred_at": raw["occurred_at"]}],
+            }
+        ],
+        "care_experiences": [
+            {
+                "elder_id": raw["elder_id"],
+                "task_type": task_type,
+                "method": content,
+                "why_it_works": "来自原始资料录入，需结合后续反馈验证。",
+                "source": source,
+                "confidence": raw["confidence"],
+                "safety": safety,
+                "status": "pending",
+            }
+        ],
+        "pending_confirmations": [
+            {
+                "elder_id": raw["elder_id"],
+                "title": f"确认{task_type}线索",
+                "content": content,
+                "suggested_value": summary,
+                "source": source,
+                "confidence": raw["confidence"],
+                "status": "pending",
+            }
+        ],
+        "boundary": safety,
+    }
+
+    saved = {"story_cards": [], "care_experiences": [], "pending_confirmations": []}
+    for card in result["life_story_cards"]:
+        cur = conn.execute(
+            """
+            INSERT INTO life_story_cards (
+              elder_id, section, title, content, care_meaning, confidence, status,
+              evidence, generated_by, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                card["elder_id"],
+                card["section"],
+                card["title"],
+                card["content"],
+                card["care_meaning"],
+                card["confidence"],
+                card["status"],
+                encode(card["evidence"]),
+                "raw_input_rule",
+                now,
+            ),
+        )
+        saved["story_cards"].append(cur.lastrowid)
+
+    for item in result["care_experiences"]:
+        cur = conn.execute(
+            """
+            INSERT INTO care_experiences (
+              elder_id, task_type, method, why_it_works, source, confidence, safety,
+              status, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item["elder_id"],
+                item["task_type"],
+                item["method"],
+                item["why_it_works"],
+                item["source"],
+                item["confidence"],
+                item["safety"],
+                item["status"],
+                now,
+            ),
+        )
+        saved["care_experiences"].append(cur.lastrowid)
+
+    for item in result["pending_confirmations"]:
+        cur = conn.execute(
+            """
+            INSERT INTO pending_confirmations (
+              elder_id, title, content, suggested_value, source, confidence, status, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item["elder_id"],
+                item["title"],
+                item["content"],
+                item["suggested_value"],
+                item["source"],
+                item["confidence"],
+                item["status"],
+                now,
+            ),
+        )
+        saved["pending_confirmations"].append(cur.lastrowid)
+
+    conn.execute(
+        """
+        UPDATE raw_inputs
+        SET status = ?, ai_result = ?, parsed_at = ?
+        WHERE id = ?
+        """,
+        ("parsed_pending_confirmation", encode(result), now, raw_input_id),
+    )
+    return {"raw_input_id": raw_input_id, "result": result, "saved": saved, "parsed_at": now}
+
+
 class CareActionHandler(BaseHTTPRequestHandler):
     server_version = "CareActionBackend/1.0"
 
@@ -1553,6 +1857,7 @@ class CareActionHandler(BaseHTTPRequestHandler):
                         "pending_confirmations": get_pending_confirmations(conn),
                         "family_story_inputs": get_family_story_inputs(conn),
                         "care_photos": get_care_photos(conn),
+                        "raw_inputs": get_raw_inputs(conn),
                     })
             if path == "/api/integrations/status":
                 return self.send_json(integration_status())
@@ -1583,6 +1888,20 @@ class CareActionHandler(BaseHTTPRequestHandler):
                 task_id = query.get("task_id", [None])[0]
                 with connect() as conn:
                     return self.send_json({"feedback": get_feedback(conn, task_id)})
+            if path == "/api/raw-inputs":
+                query = parse_qs(parsed.query)
+                elder_id = query.get("elder_id", [None])[0]
+                status = query.get("status", [None])[0]
+                limit = int(query.get("limit", ["100"])[0])
+                with connect() as conn:
+                    return self.send_json({"raw_inputs": get_raw_inputs(conn, elder_id, status, limit)})
+            if path.startswith("/api/raw-inputs/"):
+                raw_input_id = int(unquote(path.removeprefix("/api/raw-inputs/")))
+                with connect() as conn:
+                    row = conn.execute("SELECT * FROM raw_inputs WHERE id = ?", (raw_input_id,)).fetchone()
+                    if not row:
+                        return self.send_json({"error": "raw input not found"}, status=404)
+                    return self.send_json({"raw_input": raw_input_from_row(row)})
             if path == "/api/ai/profiles":
                 with connect() as conn:
                     return self.send_json({"profiles": get_ai_profiles(conn)})
@@ -1663,6 +1982,18 @@ class CareActionHandler(BaseHTTPRequestHandler):
                     item = create_feedback(conn, payload)
                     conn.commit()
                 return self.send_json({"ok": True, "feedback": item}, status=201)
+            if parsed.path == "/api/raw-inputs":
+                payload = self.read_json()
+                with connect() as conn:
+                    item = create_raw_input(conn, payload)
+                    conn.commit()
+                return self.send_json({"ok": True, "raw_input": item}, status=201)
+            if parsed.path.startswith("/api/raw-inputs/") and parsed.path.endswith("/parse"):
+                raw_input_id = int(unquote(parsed.path.removeprefix("/api/raw-inputs/").removesuffix("/parse")))
+                with connect() as conn:
+                    result = parse_raw_input(conn, raw_input_id)
+                    conn.commit()
+                return self.send_json({"ok": True, **result}, status=201)
             if parsed.path == "/api/source/sync":
                 payload = self.read_json()
                 elder_id = str(payload.get("elder_id") or "").strip()
