@@ -1609,6 +1609,15 @@ def complete_task(conn, task_id, payload):
     return {"id": cur.lastrowid, "task_id": task_id, "elder_id": task["elder_id"], "created_at": created_at}
 
 
+def reset_tasks(conn):
+    reset_items = []
+    for task in SEED_TASKS:
+        status = task.get("status") or "待执行"
+        conn.execute("UPDATE tasks SET status = ? WHERE id = ?", (status, task["id"]))
+        reset_items.append({"id": task["id"], "status": status})
+    return reset_items
+
+
 def create_help_request(conn, task_id, payload):
     task = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
     if not task:
@@ -2051,6 +2060,11 @@ class CareActionHandler(BaseHTTPRequestHandler):
                     result = save_care_photos(conn, payload)
                     conn.commit()
                 return self.send_json({"ok": True, **result}, status=201)
+            if parsed.path == "/api/tasks/reset":
+                with connect() as conn:
+                    reset_items = reset_tasks(conn)
+                    conn.commit()
+                    return self.send_json({"ok": True, "tasks": reset_items}, status=201)
             if parsed.path.startswith("/api/tasks/") and parsed.path.endswith("/complete"):
                 task_id = unquote(parsed.path.removeprefix("/api/tasks/").removesuffix("/complete"))
                 payload = self.read_json()

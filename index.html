@@ -4544,6 +4544,7 @@
       </div>
       <div class="admin-actions">
         <button class="primary-button" type="button" id="dailySummaryButton">今日汇总</button>
+        <button class="ghost-button" type="button" id="resetTasksButton">重置任务</button>
         <button class="ghost-button" type="button" id="adminLogoutButton">退出</button>
       </div>
     </header>
@@ -6238,7 +6239,7 @@
         state.apiOnline = true;
         state.weakNetwork = false;
         status.className = "feedback-status show success";
-        status.textContent = result.warning || "今日汇总已完成，任务建议已更新。";
+        status.textContent = result.warning || "已汇总。";
       } catch (error) {
         state.apiOnline = false;
         state.weakNetwork = true;
@@ -6249,6 +6250,39 @@
         state.summaryRunning = false;
         button.disabled = false;
         button.textContent = "今日汇总";
+        updateSyncUI();
+        renderAll();
+      }
+    }
+
+    async function resetCareTasks() {
+      const button = $("#resetTasksButton");
+      const status = $("#dailySummaryStatus");
+      button.disabled = true;
+      button.textContent = "重置中";
+      status.className = "feedback-status show pending";
+      status.textContent = "重置中...";
+      try {
+        await apiRequest("/api/tasks/reset", {
+          method: "POST",
+          body: JSON.stringify({}),
+          timeoutMs: 9000
+        });
+        state.completedTaskIds = [];
+        await loadFromBackend();
+        state.apiOnline = true;
+        state.weakNetwork = false;
+        status.className = "feedback-status show success";
+        status.textContent = "已重置。";
+      } catch (error) {
+        state.apiOnline = false;
+        state.weakNetwork = true;
+        status.className = "feedback-status show warning";
+        status.textContent = "重置失败。";
+        console.warn("任务重置失败。", error);
+      } finally {
+        button.disabled = false;
+        button.textContent = "重置任务";
         updateSyncUI();
         renderAll();
       }
@@ -6485,6 +6519,10 @@
 
     $("#dailySummaryButton").addEventListener("click", () => {
       runDailySummary();
+    });
+
+    $("#resetTasksButton").addEventListener("click", () => {
+      resetCareTasks();
     });
 
     $("#elderRegisterForm").addEventListener("submit", (event) => {
