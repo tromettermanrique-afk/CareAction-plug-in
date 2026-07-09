@@ -2407,7 +2407,7 @@ class CareActionHandler(BaseHTTPRequestHandler):
 
     def send_static(self, path):
         if path in ("", "/"):
-            path = "/index.html"
+            path = "/caregiver_software.html"
         safe_path = Path(unquote(path.lstrip("/")))
         full_path = (ROOT / safe_path).resolve()
         if ROOT not in full_path.parents and full_path != ROOT:
