@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>护工工作台 · CareAction 插件演示</title>
+  <style>
+    :root {
+      --ink: #132b46;
+      --muted: #687c94;
+      --line: #dfe7f0;
+      --bg: #edf2f6;
+      --card: #ffffff;
+      --blue: #123b63;
+      --green: #2f7d5f;
+      --warm: #c76b64;
+      --soft-green: #eaf6ef;
+      --soft-warm: #fff1ef;
+      --shadow: 0 14px 34px rgba(18, 45, 74, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      width: min(100%, 980px);
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 16px 14px 92px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin: -16px -14px 14px;
+      padding: calc(14px + env(safe-area-inset-top)) 16px 12px;
+      background: rgba(237, 242, 246, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(223, 231, 240, 0.8);
+    }
+
+    .topbar__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title {
+      min-width: 0;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .shift {
+      min-width: 118px;
+      padding: 9px 12px;
+      border-radius: 15px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      text-align: right;
+      box-shadow: 0 8px 20px rgba(18, 45, 74, 0.06);
+    }
+
+    .shift strong {
+      display: block;
+      font-size: 17px;
+      font-weight: 850;
+    }
+
+    .shift span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .summary__item {
+      min-height: 74px;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+
+    .summary__item b {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .summary__item span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .toolbar h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .refresh {
+      border: 0;
+      border-radius: 13px;
+      min-height: 42px;
+      padding: 0 14px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .tasks {
+      display: grid;
+      gap: 14px;
+    }
+
+    .task-card {
+      overflow: hidden;
+      border-radius: 22px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .task-card.is-done {
+      opacity: .72;
+    }
+
+    .task-card__inner {
+      padding: 18px;
+    }
+
+    .task-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 13px;
+      align-items: start;
+    }
+
+    .avatar {
+      display: grid;
+      width: 56px;
+      height: 56px;
+      place-items: center;
+      border-radius: 18px;
+      background: #eef2f7;
+      color: #5c4a96;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .elder {
+      min-width: 0;
+    }
+
+    .elder h3 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.16;
+      font-weight: 950;
+    }
+
+    .elder p {
+      margin: 6px 0 0;
+      color: #6c7f98;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    .time-box {
+      min-width: 92px;
+      text-align: right;
+    }
+
+    .time-box strong {
+      display: block;
+      color: #667a93;
+      font-size: 22px;
+      font-weight: 850;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #eef5f8;
+      color: #33536f;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .status.done {
+      background: var(--soft-green);
+      color: var(--green);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .info {
+      min-width: 0;
+      min-height: 72px;
+      padding: 10px;
+      border-radius: 14px;
+      background: #f7fafc;
+      border: 1px solid #e7eef5;
+    }
+
+    .info span {
+      display: block;
+      color: #6f8196;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .info b {
+      display: block;
+      margin-top: 6px;
+      color: #1d3551;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 850;
+      word-break: break-word;
+    }
+
+    .risks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .risk {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--soft-warm);
+      color: #9d403d;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .risk.medium {
+      background: #fff8e8;
+      color: #8a5a14;
+    }
+
+    .risk.normal {
+      background: #eef6f3;
+      color: var(--green);
+    }
+
+    .plugin-slot {
+      margin-top: 14px;
+    }
+
+    .task-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .task-footer button {
+      border: 0;
+      min-height: 50px;
+      border-radius: 15px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .complete-btn {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .complete-btn:disabled {
+      background: #b8c8c2;
+      color: #fff;
+    }
+
+    .help-btn {
+      background: #eef5f8;
+      color: #214866;
+    }
+
+    .empty, .error {
+      padding: 28px 18px;
+      border-radius: 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .error {
+      color: #ad303a;
+      background: #fff7f6;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 20;
+      width: min(100%, 980px);
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      background: rgba(255, 255, 255, 0.94);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-item {
+      border: 0;
+      border-radius: 14px;
+      min-height: 50px;
+      background: transparent;
+      color: #6e8096;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .nav-item.active {
+      background: #eaf1f7;
+      color: var(--blue);
+    }
+
+    @media (min-width: 760px) {
+      .app {
+        padding: 24px 24px 100px;
+      }
+
+      .topbar {
+        margin: -24px -24px 20px;
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .tasks {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .summary__item {
+        padding: 10px;
+      }
+
+      .summary__item b {
+        font-size: 22px;
+      }
+
+      .task-card__inner {
+        padding: 16px;
+      }
+
+      .elder h3 {
+        font-size: 24px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .task-footer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="topbar__row">
+        <div class="title">
+          <h1>护工工作台</h1>
+          <p id="caregiverName">正在连接...</p>
+        </div>
+        <div class="shift">
+          <strong id="shiftName">--</strong>
+          <span id="shiftPeriod">--</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="summary" aria-label="今日任务概览">
+      <div class="summary__item"><b id="totalCount">--</b><span>今日任务</span></div>
+      <div class="summary__item"><b id="pendingCount">--</b><span>待完成</span></div>
+      <div class="summary__item"><b id="doneCount">--</b><span>已完成</span></div>
+    </section>
+
+    <div class="toolbar">
+      <h2>护理计划</h2>
+      <button class="refresh" id="refreshBtn" type="button">刷新</button>
+    </div>
+
+    <section class="tasks" id="taskList" aria-live="polite">
+      <div class="empty">正在读取数据库...</div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="底部导航">
+    <button class="nav-item active" type="button">工作台</button>
+    <button class="nav-item" type="button">任务</button>
+    <button class="nav-item" type="button">老人</button>
+    <button class="nav-item" type="button">我的</button>
+  </nav>
+
+  <script src="./careaction_plugin.js"></script>
+  <script>
+    const state = {
+      apiBase: "",
+      pluginKey: window.CAREACTION_PLUGIN_KEY || "",
+      tasks: [],
+    };
+
+    const apiCandidates = [
+      window.CAREACTION_API_BASE || "",
+      location.protocol.startsWith("http") ? location.origin : "",
+      "https://careaction-1.onrender.com",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+    ].filter(Boolean);
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function headers() {
+      const result = { "Content-Type": "application/json" };
+      if (state.pluginKey) result["X-CareAction-Key"] = state.pluginKey;
+      return result;
+    }
+
+    async function getJson(path) {
+      let lastError;
+      for (const base of apiCandidates) {
+        try {
+          const response = await fetch(`${base.replace(/\/$/, "")}${path}`, { headers: headers() });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok || data.error) throw new Error(data.error || `HTTP ${response.status}`);
+          state.apiBase = base.replace(/\/$/, "");
+          return data;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("api unavailable");
+    }
+
+    async function postJson(path, payload) {
+      if (!state.apiBase) await getJson("/api/plugin/caregiver/tasks");
+      const response = await fetch(`${state.apiBase}${path}`, {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify(payload || {}),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.error) throw new Error(data.error || `HTTP ${response.status}`);
+      return data;
+    }
+
+    function riskClass(task) {
+      if (task.risk_level === "high") return "";
+      if (task.risk_level === "medium") return "medium";
+      return "normal";
+    }
+
+    function renderSummary(payload) {
+      const shift = payload.shift || {};
+      const summary = payload.summary || {};
+      document.getElementById("caregiverName").textContent = `${shift.caregiver || "护理员"} · ${shift.date || ""}`;
+      document.getElementById("shiftName").textContent = shift.name || "--";
+      document.getElementById("shiftPeriod").textContent = shift.period || "--";
+      document.getElementById("totalCount").textContent = summary.total ?? payload.tasks?.length ?? "--";
+      document.getElementById("pendingCount").textContent = summary.pending ?? "--";
+      document.getElementById("doneCount").textContent = summary.completed ?? "--";
+    }
+
+    function taskCard(task) {
+      const profile = task.core_profile || {};
+      const risks = Array.isArray(task.risks) ? task.risks : [];
+      const statusClass = task.completed ? "status done" : "status";
+      return `
+        <article class="task-card ${task.completed ? "is-done" : ""}" data-task-id="${escapeHtml(task.task_id)}">
+          <div class="task-card__inner">
+            <div class="task-head">
+              <div class="avatar">${escapeHtml((task.elder_name || "?").slice(0, 1))}</div>
+              <div class="elder">
+                <h3>${escapeHtml(task.elder_name || "未命名")}</h3>
+                <p>${escapeHtml(task.room || "--")} · ${escapeHtml(task.task_title || "护理任务")}</p>
+              </div>
+              <div class="time-box">
+                <strong>${escapeHtml(task.time || "--")}</strong>
+                <span class="${statusClass}">${escapeHtml(task.status || "待执行")}</span>
+              </div>
+            </div>
+
+            <div class="info-grid">
+              <div class="info"><span>称呼</span><b>${escapeHtml(profile["称呼"] || "未录入")}</b></div>
+              <div class="info"><span>禁忌</span><b>${escapeHtml(profile["禁忌"] || "未录入")}</b></div>
+              <div class="info"><span>偏好</span><b>${escapeHtml(profile["偏好"] || "未录入")}</b></div>
+            </div>
+
+            <div class="risks">
+              ${risks.map((item) => `<span class="risk ${riskClass(task)}">${escapeHtml(item)}</span>`).join("") || `<span class="risk normal">常规</span>`}
+            </div>
+
+            <div class="plugin-slot" data-plugin-root></div>
+
+            <div class="task-footer">
+              <button class="complete-btn" data-complete type="button" ${task.completed ? "disabled" : ""}>
+                ${task.completed ? "已完成" : "完成任务"}
+              </button>
+              <button class="help-btn" data-help type="button">需要帮助</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function mountPlugins() {
+      document.querySelectorAll("[data-task-id]").forEach((card) => {
+        const taskId = card.dataset.taskId;
+        const task = state.tasks.find((item) => item.task_id === taskId);
+        const root = card.querySelector("[data-plugin-root]");
+        window.CareActionPlugin.mount({
+          root,
+          apiBase: state.apiBase,
+          taskId,
+          staffLevel: "normal",
+          hasSuggestion: Boolean(task && task.has_ai_suggestion),
+          pluginKey: state.pluginKey,
+        });
+      });
+    }
+
+    function bindTaskActions() {
+      document.querySelectorAll("[data-complete]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const card = button.closest("[data-task-id]");
+          const taskId = card.dataset.taskId;
+          button.disabled = true;
+          button.textContent = "提交中";
+          try {
+            await postJson(`/api/tasks/${encodeURIComponent(taskId)}/complete`, { reaction: "护工软件完成任务" });
+            await loadTasks();
+          } catch (error) {
+            button.disabled = false;
+            button.textContent = "重试";
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-help]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const card = button.closest("[data-task-id]");
+          const taskId = card.dataset.taskId;
+          button.disabled = true;
+          button.textContent = "已发送";
+          try {
+            await postJson(`/api/tasks/${encodeURIComponent(taskId)}/help`, { note: "护工端请求协助" });
+          } catch (error) {
+            button.disabled = false;
+            button.textContent = "重试";
+          }
+        });
+      });
+    }
+
+    function renderTasks(tasks) {
+      const container = document.getElementById("taskList");
+      if (!tasks.length) {
+        container.innerHTML = `<div class="empty">数据库暂无护理任务。</div>`;
+        return;
+      }
+      container.innerHTML = tasks.map(taskCard).join("");
+      mountPlugins();
+      bindTaskActions();
+    }
+
+    async function loadTasks() {
+      const container = document.getElementById("taskList");
+      container.innerHTML = `<div class="empty">正在读取数据库...</div>`;
+      try {
+        const payload = await getJson("/api/plugin/caregiver/tasks");
+        state.tasks = Array.isArray(payload.tasks) ? payload.tasks : [];
+        renderSummary(payload);
+        renderTasks(state.tasks);
+      } catch (error) {
+        container.innerHTML = `<div class="error">连接失败：无法读取数据库任务。</div>`;
+      }
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadTasks);
+    loadTasks();
+  </script>
+</body>
+</html>

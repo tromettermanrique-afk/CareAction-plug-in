@@ -14,6 +14,7 @@ from integrations import (
     integration_status,
     load_env,
 )
+from plugin_integrations import generate_plugin_suggestion
 
 try:
     import psycopg
@@ -1291,6 +1292,209 @@ def get_current_task_payload(conn):
     }
 
 
+def plugin_shift_payload():
+    now = dt.datetime.now()
+    hour = now.hour
+    if 7 <= hour < 15:
+        name = "早班"
+        period = "07:00-15:00"
+    elif 15 <= hour < 22:
+        name = "中班"
+        period = "15:00-22:00"
+    else:
+        name = "夜班"
+        period = "22:00-07:00"
+    return {
+        "name": name,
+        "period": period,
+        "date": now.strftime("%Y-%m-%d"),
+        "caregiver": os.environ.get("PLUGIN_CAREGIVER_NAME", "护理员"),
+    }
+
+
+def plugin_task_type(task):
+    text = " ".join([str(task.get("title", "")), " ".join(str(item) for item in task.get("risks", []))])
+    rules = [
+        ("进食", ["饭", "餐", "食", "粥", "吞咽"]),
+        ("洗漱", ["洗", "漱", "脸", "口腔"]),
+        ("转移", ["转移", "如厕", "起身", "行走", "跌倒"]),
+        ("活动", ["活动", "散步", "音乐", "沪剧"]),
+        ("情绪安抚", ["焦虑", "抗拒", "情绪", "陪伴"]),
+    ]
+    for task_type, keywords in rules:
+        if any(keyword in text for keyword in keywords):
+            return task_type
+    return "日常照护"
+
+
+def plugin_is_completed(status):
+    text = str(status or "").strip().lower()
+    return text in {"done", "complete", "completed", "已完成", "完成"} or "完成" in text
+
+
+def plugin_risk_level(task):
+    text = " ".join(
+        [
+            str(task.get("priority", "")),
+            str(task.get("safetyLevel", "")),
+            str(task.get("safetyTitle", "")),
+            str(task.get("safetyText", "")),
+            " ".join(str(item) for item in task.get("risks", [])),
+        ]
+    )
+    if any(keyword in text for keyword in ["高", "吞咽", "跌倒", "转移", "用药", "急救", "约束"]):
+        return "high"
+    if any(keyword in text for keyword in ["中", "确认", "观察"]):
+        return "medium"
+    return "normal"
+
+
+def plugin_pick_tag(items, keywords=None, fallback="未录入"):
+    values = [str(item).strip() for item in (items or []) if str(item).strip()]
+    if keywords:
+        for value in values:
+            if any(keyword in value for keyword in keywords):
+                return value
+    return values[0] if values else fallback
+
+
+def plugin_elder_core_profile(elder):
+    preferences = elder.get("preferenceTags", []) if elder else []
+    avoids = elder.get("avoidTags", []) if elder else []
+    family = elder.get("familySummary", []) if elder else []
+    return {
+        "称呼": plugin_pick_tag(preferences, ["老师", "校长", "阿姨", "叔", "伯", "奶"], elder.get("name", "未录入") if elder else "未录入"),
+        "禁忌": plugin_pick_tag(avoids, fallback="未录入"),
+        "偏好": plugin_pick_tag(preferences or family, fallback="未录入"),
+    }
+
+
+def plugin_task_card(task, elder, suggestion=None):
+    return {
+        "task_id": task["id"],
+        "elder_id": task["elderId"],
+        "time": task["time"],
+        "task_title": task["title"],
+        "task_type": plugin_task_type(task),
+        "status": task["status"],
+        "completed": plugin_is_completed(task["status"]),
+        "risk_level": plugin_risk_level(task),
+        "risks": task.get("risks", []),
+        "elder_name": elder.get("name", ""),
+        "room": elder.get("room", ""),
+        "elder_status": elder.get("status", ""),
+        "core_profile": plugin_elder_core_profile(elder),
+        "has_ai_suggestion": bool(suggestion),
+        "suggestion_headline": suggestion.get("headline", "") if suggestion else "",
+    }
+
+
+def get_plugin_caregiver_tasks_payload(conn):
+    elders = get_elders(conn)
+    suggestions = latest_task_suggestion_map(conn)
+    tasks = [plugin_task_card(task, elders.get(task["elderId"], {}), suggestions.get(task["id"])) for task in get_tasks(conn)]
+    return {
+        "ok": True,
+        "shift": plugin_shift_payload(),
+        "summary": {
+            "total": len(tasks),
+            "pending": len([task for task in tasks if not task["completed"]]),
+            "completed": len([task for task in tasks if task["completed"]]),
+        },
+        "tasks": tasks,
+    }
+
+
+def plugin_find_task(conn, task_id):
+    task = next((item for item in get_tasks(conn) if item["id"] == task_id), None)
+    if not task:
+        raise ValueError("task_id not found")
+    elders = get_elders(conn)
+    elder = elders.get(task["elderId"])
+    if not elder:
+        raise ValueError("elder not found")
+    return task, elder
+
+
+def gather_plugin_suggestion_context(conn, task_id, staff_level="normal"):
+    task, elder = plugin_find_task(conn, task_id)
+    try:
+        external_records = fetch_external_records(elder["id"])
+    except Exception:
+        external_records = []
+    return {
+        "task": task,
+        "elder": elder,
+        "staff_level": staff_level,
+        "feedback": get_feedback(conn, task_id)[:20],
+        "raw_inputs": get_raw_inputs(conn, elder_id=elder["id"], limit=50),
+        "family_inputs": get_family_story_inputs(conn, elder["id"])[:30],
+        "life_story_cards": get_life_story_cards(conn, elder["id"])[:30],
+        "care_experiences": get_care_experiences(conn, elder["id"])[:30],
+        "pending_confirmations": get_pending_confirmations(conn, elder["id"])[:20],
+        "external_records": external_records[:50],
+    }
+
+
+def plugin_steps_from_action(action, fallback=None):
+    text = str(action or "").strip()
+    if not text:
+        return fallback or []
+    for sep in ["\n", "；", ";", "。"]:
+        if sep in text:
+            return [item.strip() for item in text.split(sep) if item.strip()][:3]
+    return [text]
+
+
+def plugin_suggestion_response(task, elder, suggestion, cached=False, generated_by="database", model="", warning=""):
+    steps = suggestion.get("steps") or plugin_steps_from_action(suggestion.get("action"), [task.get("mainAction", "")])
+    return {
+        "ok": True,
+        "cached": cached,
+        "task_id": task["id"],
+        "elder_id": elder["id"],
+        "headline": suggestion.get("headline") or task.get("actionTitle") or task.get("title"),
+        "steps": steps[:3],
+        "script": suggestion.get("script") or task.get("script", ""),
+        "safety": suggestion.get("safety") or task.get("safetyText", ""),
+        "source_summary": suggestion.get("source_summary") or task.get("confidenceNote", ""),
+        "confidence": int(suggestion.get("confidence") or task.get("confidence") or 60),
+        "evidence": suggestion.get("evidence") or task.get("evidence", []),
+        "generated_by": generated_by,
+        "model": model,
+        "warning": warning,
+    }
+
+
+def save_plugin_task_suggestion(conn, task, generated):
+    now = dt.datetime.now().isoformat(timespec="seconds")
+    suggestion = generated.get("suggestion") or {}
+    steps = [str(item).strip() for item in suggestion.get("steps", []) if str(item).strip()]
+    cur = conn.execute(
+        """
+        INSERT INTO task_suggestions (
+          task_id, elder_id, headline, action, script, safety, source_summary,
+          confidence, evidence, generated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            task["id"],
+            task["elderId"],
+            str(suggestion.get("headline") or task.get("actionTitle") or task.get("title")),
+            "\n".join(steps) or str(task.get("mainAction") or ""),
+            str(suggestion.get("script") or task.get("script") or ""),
+            str(suggestion.get("safety") or task.get("safetyText") or "遵循机构流程，必要时人工确认。"),
+            str(suggestion.get("source_summary") or task.get("confidenceNote") or ""),
+            int(suggestion.get("confidence") or task.get("confidence") or 60),
+            encode(suggestion.get("evidence") or task.get("evidence") or []),
+            now,
+        ),
+    )
+    saved = get_task_suggestions(conn, task["id"])[0]
+    saved["id"] = cur.lastrowid
+    return saved
+
+
 def gather_profile_context(conn, elder_id):
     elders = get_elders(conn)
     elder = elders.get(elder_id)
@@ -1936,7 +2140,7 @@ class CareActionHandler(BaseHTTPRequestHandler):
     def end_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-CareAction-Key")
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
@@ -1944,12 +2148,23 @@ class CareActionHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
 
+    def plugin_authorized(self):
+        configured = os.environ.get("PLUGIN_API_KEY", "").strip()
+        if not configured:
+            return True
+        return self.headers.get("X-CareAction-Key", "").strip() == configured
+
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
         try:
             if path == "/api/health":
                 return self.send_json({"ok": True, "database": str(DB_PATH), "time": dt.datetime.now().isoformat()})
+            if path == "/api/plugin/caregiver/tasks":
+                if not self.plugin_authorized():
+                    return self.send_json({"error": "unauthorized"}, status=401)
+                with connect() as conn:
+                    return self.send_json(get_plugin_caregiver_tasks_payload(conn))
             if path == "/api/bootstrap":
                 with connect() as conn:
                     return self.send_json({
@@ -2041,6 +2256,44 @@ class CareActionHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         parsed = urlparse(self.path)
         try:
+            if parsed.path == "/api/plugin/suggestions":
+                if not self.plugin_authorized():
+                    return self.send_json({"error": "unauthorized"}, status=401)
+                payload = self.read_json()
+                task_id = str(payload.get("task_id") or "").strip()
+                if not task_id:
+                    return self.send_json({"error": "task_id required"}, status=400)
+                force_refresh = bool(payload.get("force_refresh"))
+                staff_level = str(payload.get("staff_level") or "normal").strip()
+                with connect() as conn:
+                    task, elder = plugin_find_task(conn, task_id)
+                    cached = get_task_suggestions(conn, task_id)
+                    if cached and not force_refresh:
+                        return self.send_json(plugin_suggestion_response(task, elder, cached[0], cached=True))
+                    context = gather_plugin_suggestion_context(conn, task_id, staff_level)
+                    generated = generate_plugin_suggestion(context)
+                    saved = save_plugin_task_suggestion(conn, task, generated)
+                    conn.commit()
+                    return self.send_json(
+                        plugin_suggestion_response(
+                            task,
+                            elder,
+                            saved,
+                            cached=False,
+                            generated_by=generated.get("generated_by", "unknown"),
+                            model=generated.get("model", ""),
+                            warning=generated.get("warning", ""),
+                        ),
+                        status=201,
+                    )
+            if parsed.path == "/api/plugin/feedback":
+                if not self.plugin_authorized():
+                    return self.send_json({"error": "unauthorized"}, status=401)
+                payload = self.read_json()
+                with connect() as conn:
+                    item = create_feedback(conn, payload)
+                    conn.commit()
+                return self.send_json({"ok": True, "feedback": item}, status=201)
             if parsed.path == "/api/daily-summary":
                 with connect() as conn:
                     context = gather_daily_summary_context(conn)
