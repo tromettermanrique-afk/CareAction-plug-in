@@ -554,6 +554,31 @@
       document.getElementById("doneCount").textContent = summary.completed ?? "--";
     }
 
+    function updateSummaryCounts() {
+      const total = state.tasks.length;
+      const done = state.tasks.filter((task) => task.completed).length;
+      document.getElementById("totalCount").textContent = total;
+      document.getElementById("pendingCount").textContent = Math.max(total - done, 0);
+      document.getElementById("doneCount").textContent = done;
+    }
+
+    function markTaskComplete(taskId, card, button) {
+      const task = state.tasks.find((item) => item.task_id === taskId);
+      if (task) {
+        task.completed = true;
+        task.status = "已完成";
+      }
+      card.classList.add("is-done");
+      const status = card.querySelector(".status");
+      if (status) {
+        status.textContent = "已完成";
+        status.classList.add("done");
+      }
+      button.disabled = true;
+      button.textContent = "已完成";
+      updateSummaryCounts();
+    }
+
     function taskCard(task) {
       const profile = task.core_profile || {};
       const risks = Array.isArray(task.risks) ? task.risks : [];
@@ -621,7 +646,7 @@
           button.textContent = "提交中";
           try {
             await postJson(`/api/tasks/${encodeURIComponent(taskId)}/complete`, { reaction: "护工软件完成任务" });
-            await loadTasks();
+            markTaskComplete(taskId, card, button);
           } catch (error) {
             button.disabled = false;
             button.textContent = "重试";
