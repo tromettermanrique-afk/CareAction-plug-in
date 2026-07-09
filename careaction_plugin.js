@@ -159,30 +159,47 @@
     return text.slice(0, maxLen).replace(/[。；;，,、\s]+$/g, "");
   }
 
-  function firstEvidence(data) {
+  function allSuggestionText(data) {
     const evidence = Array.isArray(data.evidence) ? data.evidence : [];
-    const item = evidence.find((entry) => entry && entry.text) || {};
-    return shortText(item.text || data.source_summary || "", 34);
-  }
-
-  function mainAction(data) {
     const steps = Array.isArray(data.steps) ? data.steps : [];
-    return shortText(steps[0] || data.headline || "", 38);
+    return [
+      data.headline,
+      data.source_summary,
+      data.script,
+      ...steps,
+      ...evidence.map((item) => item && item.text),
+    ]
+      .filter(Boolean)
+      .join("。");
   }
 
-  function safetyLine(data) {
-    return shortText(data.safety || "异常时先停下，按机构流程处理。", 42);
+  function pickCue(text) {
+    const cues = [
+      { word: "红围巾", like: "喜欢红围巾", mood: "离开围巾会焦躁", use: "做事前可以先提红围巾" },
+      { word: "围巾", like: "喜欢围巾", mood: "离开围巾会焦躁", use: "做事前可以先提围巾" },
+      { word: "沪剧", like: "喜欢沪剧", mood: "紧张时听沪剧会稳一点", use: "开始前可以先放沪剧" },
+      { word: "靠窗", like: "喜欢靠窗", mood: "换位置可能不安心", use: "能靠窗就尽量靠窗" },
+      { word: "女儿", like: "在意女儿", mood: "提到女儿会安心一点", use: "可以轻轻提一句女儿" },
+    ];
+    return cues.find((cue) => text.includes(cue.word));
+  }
+
+  function taskVerb(data) {
+    const text = allSuggestionText(data);
+    if (text.includes("吃") || text.includes("餐") || text.includes("饭") || text.includes("粥")) return "吃饭时";
+    if (text.includes("洗") || text.includes("脸") || text.includes("漱")) return "洗漱前";
+    if (text.includes("转移") || text.includes("如厕") || text.includes("起身")) return "起身前";
+    return "开始前";
   }
 
   function buildVoiceText(data) {
-    const reason = firstEvidence(data);
-    const action = mainAction(data);
-    const safety = safetyLine(data);
-    const parts = [];
-    if (reason) parts.push(`提醒：因为${reason}`);
-    if (action) parts.push(`大概这样做：${action}`);
-    if (safety) parts.push(`注意：${safety}`);
-    return parts.join("。");
+    const text = allSuggestionText(data);
+    const cue = pickCue(text);
+    if (cue) {
+      return `${cue.like}。${cue.mood}。${taskVerb(data)}，${cue.use}。`;
+    }
+    const action = shortText((Array.isArray(data.steps) && data.steps[0]) || data.headline || "", 26);
+    return action ? `${taskVerb(data)}，${action}。` : "先看老人状态，再慢慢开始。";
   }
 
   function speak(text) {
