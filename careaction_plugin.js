@@ -8,155 +8,123 @@
     style.textContent = `
       .ca-plugin {
         border: 1px solid #d9e3ef;
-        border-radius: 16px;
+        border-radius: 18px;
         background: #ffffff;
         box-shadow: 0 8px 22px rgba(15, 35, 60, 0.06);
         overflow: hidden;
       }
-      .ca-plugin__head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 14px 14px 10px;
-        border-bottom: 1px solid #edf2f7;
+      .ca-voice {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        gap: 14px;
+        align-items: stretch;
+        padding: 16px;
       }
-      .ca-plugin__brand {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 0;
-        color: #113455;
-        font-size: 16px;
-        font-weight: 800;
-      }
-      .ca-plugin__mark {
-        display: inline-grid;
-        width: 28px;
-        height: 28px;
+      .ca-voice__play {
+        display: grid;
         place-items: center;
-        border-radius: 9px;
-        background: #113455;
-        color: #fff;
-        font-size: 13px;
-        letter-spacing: 0;
-      }
-      .ca-plugin__body {
-        padding: 14px;
-      }
-      .ca-plugin__actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .ca-plugin button {
+        width: 92px;
+        min-height: 92px;
         border: 0;
-        border-radius: 12px;
-        min-height: 42px;
-        padding: 0 14px;
-        font-size: 15px;
-        font-weight: 750;
+        border-radius: 24px;
+        background: #123b63;
+        color: #ffffff;
+        box-shadow: 0 14px 28px rgba(18, 59, 99, 0.20);
         cursor: pointer;
       }
-      .ca-plugin button:disabled {
-        cursor: not-allowed;
-        opacity: .65;
+      .ca-voice__play:disabled {
+        opacity: .72;
+        cursor: wait;
       }
-      .ca-plugin__primary {
-        background: #2f7d5f;
-        color: #fff;
+      .ca-voice__icon {
+        display: block;
+        font-size: 34px;
+        line-height: 1;
       }
-      .ca-plugin__ghost {
-        background: #eef5f8;
-        color: #214866;
+      .ca-voice__label {
+        display: block;
+        margin-top: 8px;
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 0;
       }
-      .ca-plugin__danger {
-        background: #fff0f0;
-        color: #ad303a;
+      .ca-voice__copy {
+        min-width: 0;
+        border-radius: 18px;
+        background: #f5f9fc;
+        padding: 14px 14px 12px;
       }
-      .ca-plugin__headline {
-        margin: 0 0 12px;
-        color: #102d4a;
-        font-size: 22px;
-        line-height: 1.35;
+      .ca-voice__tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 9px;
+        border-radius: 999px;
+        background: #eaf6ef;
+        color: #2f7d5f;
+        font-size: 13px;
+        font-weight: 900;
+      }
+      .ca-voice__tag.warn {
+        background: #fff1ef;
+        color: #b24545;
+      }
+      .ca-voice__text {
+        margin: 9px 0 0;
+        color: #132b46;
+        font-size: 20px;
+        line-height: 1.45;
         font-weight: 850;
       }
-      .ca-plugin__grid {
-        display: grid;
-        gap: 10px;
-      }
-      .ca-plugin__section {
-        border-radius: 14px;
-        background: #f7fafc;
-        padding: 12px;
-      }
-      .ca-plugin__label {
-        margin-bottom: 6px;
-        color: #5f7188;
-        font-size: 13px;
-        font-weight: 800;
-      }
-      .ca-plugin__text {
-        color: #1d3551;
-        font-size: 17px;
-        line-height: 1.55;
-        font-weight: 650;
-      }
-      .ca-plugin__steps {
-        margin: 0;
-        padding-left: 22px;
-      }
-      .ca-plugin__steps li {
-        margin: 4px 0;
-        color: #1d3551;
-        font-size: 17px;
-        line-height: 1.5;
-        font-weight: 650;
-      }
-      .ca-plugin__safety {
-        background: #fff3f1;
-        border-left: 5px solid #d9574f;
-      }
-      .ca-plugin__meta {
+      .ca-voice__mini {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        color: #6b7d92;
-        font-size: 13px;
-        line-height: 1.4;
-      }
-      .ca-plugin__evidence {
-        margin: 6px 0 0;
-        padding-left: 18px;
-        color: #52677e;
-        font-size: 14px;
-        line-height: 1.5;
-      }
-      .ca-plugin__state {
-        color: #52677e;
-        font-size: 16px;
-        line-height: 1.5;
-        font-weight: 650;
-      }
-      .ca-plugin__error {
-        color: #ad303a;
-      }
-      .ca-plugin__footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        margin-top: 12px;
+        gap: 8px;
         flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .ca-voice__mini button {
+        border: 0;
+        border-radius: 12px;
+        min-height: 36px;
+        padding: 0 12px;
+        background: #eef5f8;
+        color: #214866;
+        font-size: 14px;
+        font-weight: 850;
+        cursor: pointer;
+      }
+      .ca-voice__mini button.ca-voice__ok {
+        background: #eaf6ef;
+        color: #2f7d5f;
+      }
+      .ca-voice__mini button.ca-voice__bad {
+        background: #fff1ef;
+        color: #b24545;
+      }
+      .ca-voice__error {
+        color: #b24545;
+      }
+      @media (max-width: 430px) {
+        .ca-voice {
+          grid-template-columns: 82px 1fr;
+          gap: 12px;
+          padding: 14px;
+        }
+        .ca-voice__play {
+          width: 82px;
+          min-height: 82px;
+          border-radius: 22px;
+        }
+        .ca-voice__text {
+          font-size: 18px;
+        }
       }
     `;
     document.head.appendChild(style);
   }
 
   function apiUrl(apiBase, path) {
-    const base = String(apiBase || "").replace(/\/$/, "");
-    return `${base}${path}`;
+    return `${String(apiBase || "").replace(/\/$/, "")}${path}`;
   }
 
   function requestHeaders(pluginKey) {
@@ -181,122 +149,146 @@
       body: JSON.stringify(payload || {}),
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.error) {
-      throw new Error(data.error || `HTTP ${response.status}`);
-    }
+    if (!response.ok || data.error) throw new Error(data.error || `HTTP ${response.status}`);
     return data;
   }
 
-  function renderShell(root, title, buttonText) {
+  function shortText(value, maxLen) {
+    const text = String(value || "").replace(/\s+/g, " ").trim().replace(/[。；;，,、\s]+$/g, "");
+    if (text.length <= maxLen) return text;
+    return text.slice(0, maxLen).replace(/[。；;，,、\s]+$/g, "");
+  }
+
+  function firstEvidence(data) {
+    const evidence = Array.isArray(data.evidence) ? data.evidence : [];
+    const item = evidence.find((entry) => entry && entry.text) || {};
+    return shortText(item.text || data.source_summary || "", 34);
+  }
+
+  function mainAction(data) {
+    const steps = Array.isArray(data.steps) ? data.steps : [];
+    return shortText(steps[0] || data.headline || "", 38);
+  }
+
+  function safetyLine(data) {
+    return shortText(data.safety || "异常时先停下，按机构流程处理。", 42);
+  }
+
+  function buildVoiceText(data) {
+    const reason = firstEvidence(data);
+    const action = mainAction(data);
+    const safety = safetyLine(data);
+    const parts = [];
+    if (reason) parts.push(`提醒：因为${reason}`);
+    if (action) parts.push(`大概这样做：${action}`);
+    if (safety) parts.push(`注意：${safety}`);
+    return parts.join("。");
+  }
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return false;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "zh-CN";
+    utterance.rate = 0.92;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+    return true;
+  }
+
+  function renderShell(root, options) {
     root.innerHTML = `
       <section class="ca-plugin">
-        <div class="ca-plugin__head">
-          <div class="ca-plugin__brand"><span class="ca-plugin__mark">AI</span><span>${escapeHtml(title)}</span></div>
-          <button class="ca-plugin__ghost" data-ca-refresh type="button">${escapeHtml(buttonText)}</button>
-        </div>
-        <div class="ca-plugin__body" data-ca-body>
-          <div class="ca-plugin__state">点击后，从数据库读取老人资料和任务记录生成建议。</div>
+        <div class="ca-voice">
+          <button class="ca-voice__play" data-ca-play type="button">
+            <span>
+              <span class="ca-voice__icon">▶</span>
+              <span class="ca-voice__label">听提醒</span>
+            </span>
+          </button>
+          <div class="ca-voice__copy">
+            <span class="ca-voice__tag">AI 语音</span>
+            <p class="ca-voice__text" data-ca-text>点一下，听当前任务提醒。</p>
+            <div class="ca-voice__mini">
+              <button data-ca-refresh type="button">${options.hasSuggestion ? "重听" : "生成"}</button>
+            </div>
+          </div>
         </div>
       </section>
     `;
   }
 
-  function renderLoading(root) {
-    const body = root.querySelector("[data-ca-body]");
+  function setBusy(root, busy) {
+    const play = root.querySelector("[data-ca-play]");
     const refresh = root.querySelector("[data-ca-refresh]");
-    if (refresh) refresh.disabled = true;
-    body.innerHTML = `<div class="ca-plugin__state">正在连接数据库并生成建议...</div>`;
+    if (play) play.disabled = busy;
+    if (refresh) refresh.disabled = busy;
   }
 
-  function renderError(root) {
-    const body = root.querySelector("[data-ca-body]");
-    const refresh = root.querySelector("[data-ca-refresh]");
-    if (refresh) refresh.disabled = false;
-    body.innerHTML = `<div class="ca-plugin__state ca-plugin__error">数据库未连接 / 建议生成失败</div>`;
+  function setText(root, text, error) {
+    const textEl = root.querySelector("[data-ca-text]");
+    if (!textEl) return;
+    textEl.textContent = text;
+    textEl.classList.toggle("ca-voice__error", Boolean(error));
   }
 
-  function renderSuggestion(root, data, options) {
-    const body = root.querySelector("[data-ca-body]");
+  function renderLoaded(root, data, options) {
+    const voiceText = buildVoiceText(data);
+    const tag = root.querySelector(".ca-voice__tag");
     const refresh = root.querySelector("[data-ca-refresh]");
-    if (refresh) {
-      refresh.disabled = false;
-      refresh.textContent = "刷新建议";
+    const mini = root.querySelector(".ca-voice__mini");
+    if (tag) {
+      tag.textContent = data.warning ? "规则兜底" : data.generated_by === "ai" ? "AI 已生成" : "已读取";
+      tag.classList.toggle("warn", Boolean(data.warning) || String(data.safety || "").includes("高风险"));
     }
-    const steps = Array.isArray(data.steps) ? data.steps : [];
-    const evidence = Array.isArray(data.evidence) ? data.evidence : [];
-    body.innerHTML = `
-      <p class="ca-plugin__headline">${escapeHtml(data.headline || "当前任务建议")}</p>
-      <div class="ca-plugin__grid">
-        <div class="ca-plugin__section">
-          <div class="ca-plugin__label">先做什么 / 再做什么</div>
-          <ol class="ca-plugin__steps">
-            ${steps.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || `<li>${escapeHtml(data.headline || "先确认老人状态。")}</li>`}
-          </ol>
-        </div>
-        <div class="ca-plugin__section">
-          <div class="ca-plugin__label">怎么说</div>
-          <div class="ca-plugin__text">${escapeHtml(data.script || "先说明，再开始。")}</div>
-        </div>
-        <div class="ca-plugin__section ca-plugin__safety">
-          <div class="ca-plugin__label">注意事项</div>
-          <div class="ca-plugin__text">${escapeHtml(data.safety || "异常时遵循机构流程。")}</div>
-        </div>
-        <div class="ca-plugin__section">
-          <div class="ca-plugin__label">依据 / 置信度</div>
-          <div class="ca-plugin__meta">
-            <span>${escapeHtml(data.source_summary || "来自数据库记录")}</span>
-            <strong>${escapeHtml(data.confidence ?? "--")}%</strong>
-          </div>
-          <ul class="ca-plugin__evidence">
-            ${evidence.slice(0, 3).map((item) => `<li>${escapeHtml(item.source || "依据")}：${escapeHtml(item.text || "")}</li>`).join("")}
-          </ul>
-        </div>
-      </div>
-      <div class="ca-plugin__footer">
-        <div class="ca-plugin__actions">
-          <button class="ca-plugin__primary" type="button" data-ca-feedback="有效">有效</button>
-          <button class="ca-plugin__ghost" type="button" data-ca-feedback="部分有效">部分有效</button>
-          <button class="ca-plugin__danger" type="button" data-ca-feedback="无效">无效</button>
-        </div>
-        <span class="ca-plugin__state">${escapeHtml(data.warning || (data.cached ? "已读取历史建议" : "已生成建议"))}</span>
-      </div>
-    `;
-    body.querySelectorAll("[data-ca-feedback]").forEach((button) => {
-      button.addEventListener("click", async () => {
-        button.disabled = true;
-        try {
-          await postJson(
-            options.apiBase,
-            "/api/plugin/feedback",
-            { task_id: options.taskId, effect: button.dataset.caFeedback, voice_note: "", observations: [] },
-            options.pluginKey
-          );
-          button.textContent = "已记录";
-        } catch (error) {
-          button.textContent = "失败";
-          button.disabled = false;
-        }
+    if (refresh) refresh.textContent = "重听";
+    setText(root, voiceText || "这条任务暂无语音提醒。", false);
+    if (mini && !mini.querySelector("[data-ca-feedback]")) {
+      mini.insertAdjacentHTML(
+        "beforeend",
+        `
+          <button class="ca-voice__ok" data-ca-feedback="有效" type="button">有用</button>
+          <button class="ca-voice__bad" data-ca-feedback="无效" type="button">没用</button>
+        `
+      );
+      mini.querySelectorAll("[data-ca-feedback]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          button.disabled = true;
+          try {
+            await postJson(
+              options.apiBase,
+              "/api/plugin/feedback",
+              { task_id: options.taskId, effect: button.dataset.caFeedback, voice_note: "", observations: [] },
+              options.pluginKey
+            );
+            button.textContent = "已记";
+          } catch (error) {
+            button.disabled = false;
+            button.textContent = "重试";
+          }
+        });
       });
-    });
+    }
+    return voiceText;
   }
 
   function mount(options) {
-    if (!options || !options.root) {
-      throw new Error("CareActionPlugin.mount requires root");
-    }
-    if (!options.taskId) {
-      throw new Error("CareActionPlugin.mount requires taskId");
-    }
+    if (!options || !options.root) throw new Error("CareActionPlugin.mount requires root");
+    if (!options.taskId) throw new Error("CareActionPlugin.mount requires taskId");
     ensureStyles();
     const root = typeof options.root === "string" ? document.querySelector(options.root) : options.root;
     if (!root) throw new Error("CareActionPlugin root not found");
     const apiBase = options.apiBase || window.CAREACTION_API_BASE || window.location.origin;
     const pluginKey = options.pluginKey || window.CAREACTION_PLUGIN_KEY || "";
     const instanceOptions = { ...options, apiBase, pluginKey };
-    renderShell(root, options.title || "CareAction 建议", options.hasSuggestion ? "查看建议" : "生成建议");
+    let cachedData = null;
+    let cachedVoice = "";
 
-    async function load(forceRefresh) {
-      renderLoading(root);
+    renderShell(root, options);
+
+    async function load(forceRefresh, shouldSpeak) {
+      setBusy(root, true);
+      setText(root, "正在生成语音提醒...", false);
       try {
         const data = await postJson(
           apiBase,
@@ -308,18 +300,36 @@
           },
           pluginKey
         );
-        renderSuggestion(root, data, instanceOptions);
+        cachedData = data;
+        cachedVoice = renderLoaded(root, data, instanceOptions);
+        if (shouldSpeak) speak(cachedVoice);
       } catch (error) {
-        renderError(root);
+        setText(root, "连接失败，无法生成提醒。", true);
+      } finally {
+        setBusy(root, false);
       }
     }
 
-    root.querySelector("[data-ca-refresh]").addEventListener("click", () => load(true));
-    if (options.autoLoad) load(false);
+    root.querySelector("[data-ca-play]").addEventListener("click", () => {
+      if (cachedVoice) {
+        speak(cachedVoice);
+      } else {
+        load(false, true);
+      }
+    });
+    root.querySelector("[data-ca-refresh]").addEventListener("click", () => {
+      if (cachedData && cachedVoice) {
+        speak(cachedVoice);
+      } else {
+        load(false, true);
+      }
+    });
+    if (options.autoLoad) load(false, false);
     return {
-      refresh: () => load(true),
-      load: () => load(false),
+      refresh: () => load(true, false),
+      play: () => (cachedVoice ? speak(cachedVoice) : load(false, true)),
       destroy: () => {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
         root.innerHTML = "";
       },
     };

@@ -488,6 +488,7 @@
     const apiCandidates = [
       window.CAREACTION_API_BASE || "",
       location.protocol.startsWith("http") ? location.origin : "",
+      "https://careaction-plug-in.onrender.com",
       "https://careaction-1.onrender.com",
       "http://localhost:3000",
       "http://127.0.0.1:3000",
@@ -573,9 +574,9 @@
             </div>
 
             <div class="info-grid">
-              <div class="info"><span>称呼</span><b>${escapeHtml(profile["称呼"] || "未录入")}</b></div>
-              <div class="info"><span>禁忌</span><b>${escapeHtml(profile["禁忌"] || "未录入")}</b></div>
-              <div class="info"><span>偏好</span><b>${escapeHtml(profile["偏好"] || "未录入")}</b></div>
+              <div class="info"><span>称</span><b>${escapeHtml(profile["称呼"] || "未录入")}</b></div>
+              <div class="info"><span>忌</span><b>${escapeHtml(profile["禁忌"] || "未录入")}</b></div>
+              <div class="info"><span>喜</span><b>${escapeHtml(profile["偏好"] || "未录入")}</b></div>
             </div>
 
             <div class="risks">
@@ -586,9 +587,9 @@
 
             <div class="task-footer">
               <button class="complete-btn" data-complete type="button" ${task.completed ? "disabled" : ""}>
-                ${task.completed ? "已完成" : "完成任务"}
+                ${task.completed ? "已完成" : "完成"}
               </button>
-              <button class="help-btn" data-help type="button">需要帮助</button>
+              <button class="help-btn" data-help type="button">求助</button>
             </div>
           </div>
         </article>
